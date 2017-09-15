@@ -2,8 +2,11 @@ package pcMain;
 
 import beans.Command;
 import beans.DiskInfo;
+import beans.FileCommand;
+import beans.FileDescribe;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.sun.istack.internal.NotNull;
 import pcOp.*;
 
 import java.io.*;
@@ -60,6 +63,10 @@ public class OpenService {
             String op = StringUtils.readLine(reader);
             System.out.println(op);
             String[] index=op.split("_");
+            if(index[0].equals(Parameter.FILE_LIST_FLAG)){
+                FileCommand command = gson.fromJson(index[1],FileCommand.class);
+                fileOperation(command,index[1]);
+            }
             Command command=gson.fromJson(index[1], Command.class);
             operation(command);
         }
@@ -113,6 +120,62 @@ public class OpenService {
         }
     }
 
+    private static void fileOperation(FileCommand command,String jsonSrc){
+        int type = Integer.valueOf(command.getType());
+        switch (type){
+            case 20:
+                acceptFile(command.getDescribe(),jsonSrc);
+                break;
+        }
+    }
+
+    private static void acceptFile(FileDescribe[] describes,String jsonSrc){
+        send2service(writer,Parameter.FILE_READY+"_"+jsonSrc+"_"+Parameter.END_FLAG);
+        for (FileDescribe describe : describes) {
+            String fileName = describe.getFileName()+"."+describe.getFileType();
+            Long fileSize = describe.getFileSize();
+            int count = 0;
+            long size = 0;
+            File file = new File(fileName);
+            FileOutputStream outputStream = null;
+            BufferedInputStream inputStream = null;
+
+            try{
+                byte[] bytes = new byte[4096];
+                outputStream = new FileOutputStream(file);
+                inputStream = new BufferedInputStream(connSocket.getInputStream());
+                while((count = inputStream.read(bytes))!=-1){
+                    System.out.println("count is "+count);
+                    outputStream.write(bytes,0,count);
+                    outputStream.flush();
+                    size+=count;
+                    if(size>=fileSize)
+                        break;
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+            finally {
+                try{
+                    if(outputStream!=null)
+                        outputStream.close();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+    private static void newVisionSend(@NotNull String data){
+        try {
+            byte[] bytes = data.getBytes("UTF-8");
+            connSocket.getOutputStream().write(bytes);
+            connSocket.getOutputStream().flush();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 
     private static void send2service(PrintWriter writer) {
        send2service(writer,Parameter.OK);
