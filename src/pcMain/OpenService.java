@@ -1,5 +1,6 @@
 package pcMain;
 
+import Utils.IntConvertUtils;
 import beans.Command;
 import beans.DiskInfo;
 import beans.FileCommand;
@@ -16,8 +17,8 @@ import java.util.Scanner;
 
 public class OpenService {
     private static Socket connSocket;
-    private static PrintWriter writer;
-    private static OutputStream w;
+    private static OutputStream os;
+    private static InputStream is;
     private static BufferedReader reader;
     private static Gson gson=new Gson();
 
@@ -28,15 +29,16 @@ public class OpenService {
             OutputStream outputStream = connSocket.getOutputStream();
             InputStream inputStream = connSocket.getInputStream();
 
-            w=connSocket.getOutputStream();
-            writer = new PrintWriter(new OutputStreamWriter(outputStream));
+            os=connSocket.getOutputStream();
+            is = connSocket.getInputStream();
             reader = new BufferedReader(new InputStreamReader(inputStream));
             //向服务端发送消息，我要上线
             String username = System.getProperty("user.name");
             System.out.println(username);
-            writer.println("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
-            writer.flush();
-            String result = StringUtils.readLine(reader);
+            /*writer.println("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
+            writer.flush();*/
+            sendMsg("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
+            String result = readString();
             System.out.println(result);
             if (StringUtils.startAndEnd(result)) {
 
@@ -60,8 +62,10 @@ public class OpenService {
     private static void loop() {
         while (true) {
             //持续不断的读取服务端消息
-            String op = StringUtils.readLine(reader);
-            System.out.println(op);
+            String op = readString();
+            if(!op.endsWith(Parameter.END_FLAG))
+                continue;
+            //System.out.println(op);
             String[] index=op.split("_");
             if(index[0].equals(Parameter.FILE_LIST_FLAG)){
                 FileCommand command = gson.fromJson(index[1],FileCommand.class);
@@ -72,6 +76,40 @@ public class OpenService {
         }
     }
 
+
+    private static void sendMsg(@NotNull String s){
+        try {
+            byte[] bytes = s.getBytes("UTF-8");
+            os.write(IntConvertUtils.getIntegerBytes(bytes.length));
+            os.write(bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String readString(){
+        String s = "";
+        try {
+            int msgSize = 0;
+            byte[] msgSizeBytes = new byte[4];
+            is.read(msgSizeBytes);
+            msgSize = IntConvertUtils.getIntegerByByteArray(msgSizeBytes);
+            System.out.println("msgSize is "+msgSize);
+
+            int i = 0;
+            byte[] dataBytes = new byte[msgSize];
+            while(i<msgSize){
+                dataBytes[i] = (byte)is.read();
+                i++;
+            }
+            s = new String(dataBytes);
+            System.out.println("msg is "+s);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+
     /**
      * 对电脑的操作
      */
@@ -79,7 +117,7 @@ public class OpenService {
         int type=Integer.valueOf(command.getType());
         switch (type) {
             case -1:
-                send2service(writer);
+                send2service();
                 break;
             case 0://关机
                 PcTools pcTools = new PcTools();
@@ -94,7 +132,7 @@ public class OpenService {
             case 2:
                 PcScreen pcScreen=new PcScreen(command.getDescribe());
                 if (command.getIsBack()){
-                    pcScreen.sendScreen(command.getDescribe(), w);
+                    pcScreen.sendScreen(command.getDescribe(), os);
                 }else {
                     pcScreen.shot();
                 }
@@ -103,7 +141,7 @@ public class OpenService {
             case 4://获取磁盘详细信息
                 PcDisk pcDisk=new PcDisk();
                 String diskString=gson.toJson(pcDisk.getDisk());
-                send2service(writer,diskString);
+                sendMsg(diskString);
                 break;
             case 7:
                 PcSearch pcSearch=new PcSearch();
@@ -130,7 +168,7 @@ public class OpenService {
     }
 
     private static void acceptFile(FileDescribe[] describes,String jsonSrc){
-        send2service(writer,Parameter.FILE_READY+"_"+jsonSrc+"_"+Parameter.END_FLAG);
+        sendMsg(Parameter.FILE_READY+"_"+jsonSrc+"_"+Parameter.END_FLAG);
         for (FileDescribe describe : describes) {
             String fileName = describe.getFileName()+"."+describe.getFileType();
             Long fileSize = describe.getFileSize();
@@ -177,12 +215,7 @@ public class OpenService {
         }
     }
 
-    private static void send2service(PrintWriter writer) {
-       send2service(writer,Parameter.OK);
-    }
-
-    private static void send2service(PrintWriter writer,String s) {
-        writer.println(StringUtils.addEnd_flag2Str(s));
-        writer.flush();
+    private static void send2service() {
+       sendMsg(Parameter.OK+"_"+Parameter.END_FLAG);
     }
 }

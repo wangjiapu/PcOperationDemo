@@ -1,20 +1,6 @@
-package pcMain;
+package Utils;
 
-import beans.DiskInfo;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class Test {
-    public static void main(String[] args){
-        for (byte b : getIntegerBytes(0xffffffff)) {
-            System.out.println(b);
-        }
-        System.out.println(getIntegerByByteArray(getIntegerBytes(355555)));
-    }
-
+public class IntConvertUtils {
     public static byte[] getIntegerBytes(int data){
         byte[] s = {(byte)0xff,(byte)0xff,(byte)0xff,(byte)0xff};
         s[3] = (byte)((data)&s[3]);
