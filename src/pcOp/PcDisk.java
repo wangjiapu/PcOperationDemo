@@ -2,6 +2,7 @@ package pcOp;
 
 import beans.DiskInfo;
 
+import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -30,18 +31,15 @@ public class PcDisk {
     //获取各个磁盘的使用情况
     public List<DiskInfo> getDisk() {
         List<DiskInfo> diskLists = new ArrayList<>();
-        for (char c = 'A'; c <= 'Z'; c++) {
-            String dirName = c + ":/";
-            File file = new File(dirName);
-            if (file.exists()) {
-                long total = file.getTotalSpace();
-                long free = file.getFreeSpace();
-                Double compare = (1 - free * 1.0 / total) * 100;
-                DiskInfo diskInfo=new DiskInfo();
-                diskInfo.setDrive(c+"");
-                diskInfo.setUseInfo(compare.intValue()+"");
-                diskLists.add(diskInfo);
-            }
+        FileSystemView fileSystemView=FileSystemView.getFileSystemView();
+        for (File f:File.listRoots()){
+            long total = f.getTotalSpace();
+            long free = f.getFreeSpace();
+            Double compare = (1 - free * 1.0 / total) * 100;
+            DiskInfo diskInfo=new DiskInfo();
+            diskInfo.setDrive(fileSystemView.getSystemDisplayName(f));
+            diskInfo.setUseInfo(compare.intValue()+"");
+
         }
         return diskLists;
     }
