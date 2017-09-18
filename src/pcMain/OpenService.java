@@ -12,6 +12,7 @@ import pcOp.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -24,7 +25,19 @@ public class OpenService {
     private static boolean loopFlag = true;
 
     public static void main(String[] args) {
+        while(true){
+            start();
+            try {
+                loopFlag = true;
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
+
+    private static void start(){
         try {
             connSocket = new Socket(Parameter.SERVER_IP, 10087);
             OutputStream outputStream = connSocket.getOutputStream();
@@ -59,7 +72,6 @@ public class OpenService {
         }
     }
 
-
     private static void loop() {
         while (loopFlag) {
             try{
@@ -75,11 +87,17 @@ public class OpenService {
                 if(index[0].equals(Parameter.FILE_LIST_FLAG)){
                     FileCommand command = gson.fromJson(index[1],FileCommand.class);
                     fileOperation(command,index[1]);
+                    continue;
                 }
-                Command command=gson.fromJson(index[1], Command.class);
-                operation(command);
+                if(index[0].equals(Parameter.COMMAND)){
+                    Command command=gson.fromJson(index[1], Command.class);
+                    operation(command);
+                }
             }catch (Exception e){
                 e.printStackTrace();
+                if (e instanceof SocketException){
+                    break;
+                }
             }
         }
     }
