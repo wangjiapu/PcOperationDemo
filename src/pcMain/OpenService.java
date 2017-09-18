@@ -61,18 +61,22 @@ public class OpenService {
 
     private static void loop() {
         while (true) {
-            //持续不断的读取服务端消息
-            String op = readString();
-            if(!op.endsWith(Parameter.END_FLAG))
-                continue;
-            //System.out.println(op);
-            String[] index=op.split("_");
-            if(index[0].equals(Parameter.FILE_LIST_FLAG)){
-                FileCommand command = gson.fromJson(index[1],FileCommand.class);
-                fileOperation(command,index[1]);
+            try{
+                //持续不断的读取服务端消息
+                String op = readString();
+                if(!op.endsWith(Parameter.END_FLAG))
+                    continue;
+                //System.out.println(op);
+                String[] index=op.split("_");
+                if(index[0].equals(Parameter.FILE_LIST_FLAG)){
+                    FileCommand command = gson.fromJson(index[1],FileCommand.class);
+                    fileOperation(command,index[1]);
+                }
+                Command command=gson.fromJson(index[1], Command.class);
+                operation(command);
+            }catch (Exception e){
+                e.printStackTrace();
             }
-            Command command=gson.fromJson(index[1], Command.class);
-            operation(command);
         }
     }
 
