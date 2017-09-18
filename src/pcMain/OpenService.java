@@ -21,6 +21,7 @@ public class OpenService {
     private static InputStream is;
     private static BufferedReader reader;
     private static Gson gson=new Gson();
+    private static boolean loopFlag = true;
 
     public static void main(String[] args) {
 
@@ -60,14 +61,17 @@ public class OpenService {
 
 
     private static void loop() {
-        while (true) {
+        while (loopFlag) {
             try{
                 //持续不断的读取服务端消息
                 String op = readString();
                 if(!op.endsWith(Parameter.END_FLAG))
                     continue;
-                //System.out.println(op);
+                System.out.println("op is :"+op);
                 String[] index=op.split("_");
+                System.out.println("op length is "+index.length);
+                if(index.length<2)
+                    continue;
                 if(index[0].equals(Parameter.FILE_LIST_FLAG)){
                     FileCommand command = gson.fromJson(index[1],FileCommand.class);
                     fileOperation(command,index[1]);
@@ -96,8 +100,14 @@ public class OpenService {
         try {
             int msgSize = 0;
             byte[] msgSizeBytes = new byte[4];
-            is.read(msgSizeBytes);
+            int readSize = is.read(msgSizeBytes);
+            System.out.println("readSIze is "+readSize);
             msgSize = IntConvertUtils.getIntegerByByteArray(msgSizeBytes);
+            if(msgSize<=0)
+            {
+                loopFlag = false;
+                return "";
+            }
             System.out.println("msgSize is "+msgSize);
 
             int i = 0;
