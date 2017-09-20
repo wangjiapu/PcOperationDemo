@@ -51,7 +51,7 @@ public class OpenService {
             System.out.println(username);
             /*writer.println("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
             writer.flush();*/
-            sendMsg("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
+            sendMsg("|ONLINE|_" + "tjoe" + "_tjoe_" + Parameter.END_FLAG);
             String result = readString();
             System.out.println(result);
             if (StringUtils.startAndEnd(result)) {
@@ -138,6 +138,7 @@ public class OpenService {
             System.out.println("msg is "+s);
         } catch (IOException e) {
             e.printStackTrace();
+            loopFlag = false;
         }
         return s;
     }

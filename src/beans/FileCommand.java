@@ -4,7 +4,7 @@ package beans;
  * Created by LZL on 2017/9/15.
  */
 
-public class FileCommand {
+public class FileCommand<T>{
     private String type;
     private FileDescribe[] describe;
     private boolean isBack = false;
