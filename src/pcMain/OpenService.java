@@ -173,7 +173,9 @@ public class OpenService {
             case 4://获取磁盘详细信息
                 PcDisk pcDisk=new PcDisk();
                 String diskString=gson.toJson(pcDisk.getDisk());
-                sendMsg(diskString);
+
+                sendMsg(diskString+"_"+Parameter.END_FLAG);
+                System.out.println(diskString);
                 break;
             case 7:
                 PcSearch pcSearch=new PcSearch();

@@ -37,9 +37,12 @@ public class PcDisk {
             long free = f.getFreeSpace();
             Double compare = (1 - free * 1.0 / total) * 100;
             DiskInfo diskInfo=new DiskInfo();
-            diskInfo.setDrive(fileSystemView.getSystemDisplayName(f));
-            diskInfo.setUseInfo(compare.intValue()+"");
-
+            String diskname=fileSystemView.getSystemDisplayName(f);
+            if (!diskname.isEmpty()){
+                diskInfo.setDrive(diskname);
+                diskInfo.setUseInfo(compare.intValue()+"");
+                diskLists.add(diskInfo);
+            }
         }
         return diskLists;
     }
