@@ -1,6 +1,7 @@
 package pcOp;
 
 import beans.DiskInfo;
+import beans.FileInfo;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
@@ -27,7 +28,6 @@ import java.util.List;
  * new PcDisk 直接调用方法
  */
 public class PcDisk {
-
     //获取各个磁盘的使用情况
     public List<DiskInfo> getDisk() {
         List<DiskInfo> diskLists = new ArrayList<>();
@@ -37,9 +37,13 @@ public class PcDisk {
             long free = f.getFreeSpace();
             Double compare = (1 - free * 1.0 / total) * 100;
             DiskInfo diskInfo=new DiskInfo();
-            diskInfo.setDrive(fileSystemView.getSystemDisplayName(f));
-            diskInfo.setUseInfo(compare.intValue()+"");
-
+            String diskname=fileSystemView.getSystemDisplayName(f);
+            if (!diskname.isEmpty()){
+                diskInfo.setPath(f.getPath()+"\\");
+                diskInfo.setDrive(diskname);
+                diskInfo.setUseInfo(compare.intValue()+"");
+                diskLists.add(diskInfo);
+            }
         }
         return diskLists;
     }
@@ -61,5 +65,26 @@ public class PcDisk {
     //获取cpu的使用情况
     public String getCPURate() {
        return "0%";
+    }
+
+    //获取某个磁盘下的目录
+    public  List<FileInfo> getFileDirectory(String path) {
+        List<FileInfo> fileInfos=new ArrayList<>();
+        File file = new File(path);
+        File[] files = file.listFiles();//文件夹下的所有文件或文件夹
+        if(files == null)
+            return null;
+        for (int i = 0; i < files.length; i++)
+        {
+            FileInfo fileInfo=new FileInfo();
+            fileInfo.setPath(files[i].getAbsolutePath());
+            fileInfo.setName(files[i].getName());
+            if (files[i].isDirectory())
+                fileInfo.setType(true);
+            else
+                fileInfo.setType(false);
+            fileInfos.add(fileInfo);
+        }
+        return fileInfos;
     }
 }
