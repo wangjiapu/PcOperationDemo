@@ -3,7 +3,8 @@ package beans;
 
 public class DiskInfo {
 
-    private String drive;//盘符
+    private String path;
+    private String drive;//盘符名称
     private String useInfo;//使用情况
 
     public String getDrive() {
@@ -25,5 +26,13 @@ public class DiskInfo {
     @Override
     public String toString() {
         return drive+useInfo;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

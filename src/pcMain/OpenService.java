@@ -51,7 +51,7 @@ public class OpenService {
             System.out.println(username);
             /*writer.println("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
             writer.flush();*/
-            sendMsg("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
+            sendMsg("|ONLINE|_" + "PJW" + "_Test_" + Parameter.END_FLAG);
             String result = readString();
             System.out.println(result);
             if (StringUtils.startAndEnd(result)) {
@@ -172,10 +172,13 @@ public class OpenService {
 
             case 4://获取磁盘详细信息
                 PcDisk pcDisk=new PcDisk();
-                String diskString=gson.toJson(pcDisk.getDisk());
-
-                sendMsg(diskString+"_"+Parameter.END_FLAG);
-                System.out.println(diskString);
+                if (command.getDescribe().isEmpty()){
+                    String diskString=gson.toJson(pcDisk.getDisk());
+                    sendMsg(diskString+"_"+Parameter.END_FLAG);
+                }else{
+                    String dir=gson.toJson(pcDisk.getFileDirectory(command.getDescribe()));
+                    sendMsg(dir+"_"+Parameter.END_FLAG);
+                }
                 break;
             case 7:
                 PcSearch pcSearch=new PcSearch();
