@@ -14,10 +14,11 @@ import java.util.List;
 
 public class Test {
     public static void main(String[] args){
-        FileSystemView fileSystemView=FileSystemView.getFileSystemView();
-        for (File f:File.listRoots()){
-            System.out.println(f.getPath()+"\\");
-        }
+       String s="fjkshdf_lk;smfd_mjfsdklm_mflkdsm_mflkdsm";
+        System.out.println(s.substring(0,s.indexOf("_")));
+        System.out.println(s.substring(s.indexOf("_")+1,s.lastIndexOf("_")));
+        System.out.println(s.substring(s.lastIndexOf("_")+1,s.length()));
+
     }
 
 

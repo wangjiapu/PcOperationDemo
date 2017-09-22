@@ -1,5 +1,7 @@
 package pcMain;
 
+import beans.Content;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -40,5 +42,23 @@ public class StringUtils {
      */
     public static String addEnd_flag2Str(String s){
         return s+"_"+Parameter.END_FLAG;
+    }
+
+/*public static String rmEnd_flagstr(String s){
+    int endflagindex=s.lastIndexOf("_");
+    return s.substring(0,endflagindex);
+}*/
+
+    public static Content getContent(String s){
+        int head=s.indexOf("_");
+        int tail=s.lastIndexOf("_");
+        Content content=new Content();
+        content.setHead(s.substring(0,head));
+        System.out.println(content.getHead());
+        content.setContent(s.substring(head+1,tail));
+        System.out.println(content.getContent());
+        content.setTail(s.substring(tail+1,s.length()));
+        System.out.println(content.getTail());
+        return content;
     }
 }
