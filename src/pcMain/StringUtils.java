@@ -54,11 +54,8 @@ public class StringUtils {
         int tail=s.lastIndexOf("_");
         Content content=new Content();
         content.setHead(s.substring(0,head));
-        System.out.println(content.getHead());
         content.setContent(s.substring(head+1,tail));
-        System.out.println(content.getContent());
         content.setTail(s.substring(tail+1,s.length()));
-        System.out.println(content.getTail());
         return content;
     }
 }

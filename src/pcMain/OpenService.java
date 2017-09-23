@@ -122,7 +122,6 @@ public class OpenService {
                 return "";
             }
             System.out.println("msgSize is " + msgSize);
-
             int i = 0;
             byte[] dataBytes = new byte[msgSize];
             while (i < msgSize) {
@@ -165,6 +164,26 @@ public class OpenService {
                 }
                 break;
 
+            case 3://鼠标操作
+                String mouseinfo=command.getDescribe();
+                MouseOpInfo mouseOp=gson.fromJson(mouseinfo,MouseOpInfo.class);
+                if (mouseOp.isClick()){//点击了
+                    float x=mouseOp.getX();
+                    float y=mouseOp.getY();
+                   if (mouseOp.isSingleClick()){//单击
+
+                   }else if (mouseOp.isRightClick()){//右击
+
+                   }else if (mouseOp.isDoubleClick()){//双击
+
+                   }
+                }else{
+                   //调用移动的方法
+                    float x=mouseOp.getX();
+                    float y=mouseOp.getY();
+                    //start move
+                }
+                break;
             case 4://获取磁盘详细信息
                 PcDisk pcDisk = new PcDisk();
                 if (command.getDescribe().isEmpty()) {
