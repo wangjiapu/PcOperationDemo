@@ -45,6 +45,7 @@ public class OpenService {
             System.out.println(username);
             /*writer.println("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
             writer.flush();*/
+            //sendMsg("|ONLINE|_" + "tjoe" + "_tjoe_" + Parameter.END_FLAG);
             sendMsg("|ONLINE|_" + "PJW" + "_Test_" + Parameter.END_FLAG);
             String result = readString();
             System.out.println(result);
@@ -167,21 +168,21 @@ public class OpenService {
             case 3://鼠标操作
                 String mouseinfo=command.getDescribe();
                 MouseOpInfo mouseOp=gson.fromJson(mouseinfo,MouseOpInfo.class);
+                PcMouse pcMouse=new PcMouse();
                 if (mouseOp.isClick()){//点击了
-                    float x=mouseOp.getX();
-                    float y=mouseOp.getY();
                    if (mouseOp.isSingleClick()){//单击
-
+                        pcMouse.singleClick();
                    }else if (mouseOp.isRightClick()){//右击
-
+                        pcMouse.rightClick();
                    }else if (mouseOp.isDoubleClick()){//双击
-
+                        pcMouse.doubleClick();
                    }
                 }else{
                    //调用移动的方法
-                    float x=mouseOp.getX();
-                    float y=mouseOp.getY();
-                    //start move
+
+                    int x=(int)mouseOp.getX();
+                    int y=(int)mouseOp.getY();
+                    pcMouse.move(x,y);
                 }
                 break;
             case 4://获取磁盘详细信息
@@ -266,6 +267,6 @@ public class OpenService {
     }
 
     private static void send2service() {
-        sendMsg(Parameter.OK + "_" + Parameter.END_FLAG);
+        sendMsg(Parameter.CONNECTED_SUCCESS + "_" + Parameter.END_FLAG);
     }
 }
