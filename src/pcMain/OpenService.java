@@ -148,12 +148,12 @@ public class OpenService {
                 break;
             case 0://关机
                 PcTools pcTools = new PcTools();
-                pcTools.opencmd(21);
+                pcTools.opencmd(16);
                 // send2service(writer);
                 break;
             case 1://取消关机
                 PcTools pcTools1 = new PcTools();
-                pcTools1.opencmd(23);
+                pcTools1.opencmd(18);
                 break;
 
             case 2:

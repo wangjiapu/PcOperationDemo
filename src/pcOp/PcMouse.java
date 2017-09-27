@@ -76,7 +76,7 @@ public class PcMouse {
     public void move(int x,int y){
         point = MouseInfo.getPointerInfo().getLocation();
         point.x += -x;
-        point.y += -y;
+        point.y += y;
         robot.mouseMove(point.x,point.y);       /**移动鼠标到x,y位置*/
     }
 
