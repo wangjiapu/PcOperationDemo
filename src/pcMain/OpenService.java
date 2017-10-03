@@ -1,5 +1,6 @@
 package pcMain;
 
+import Utils.FileUtilsKt;
 import Utils.IntConvertUtils;
 import beans.*;
 import com.google.gson.Gson;
@@ -46,7 +47,7 @@ public class OpenService {
             /*writer.println("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
             writer.flush();*/
             //sendMsg("|ONLINE|_" + "tjoe" + "_tjoe_" + Parameter.END_FLAG);
-            sendMsg("|ONLINE|_" + "PJW" + "_Test_" + Parameter.END_FLAG);
+            sendMsg("|ONLINE|_" + "mumu" + "_mumu_" + Parameter.END_FLAG);
             String result = readString();
             System.out.println(result);
             if (StringUtils.startAndEnd(result)) {
@@ -69,12 +70,10 @@ public class OpenService {
 
     private static void loop() {
         while (loopFlag) {
-            try {
                 //持续不断的读取服务端消息
                 String op = readString();
                 if (!op.endsWith(Parameter.END_FLAG))
                     continue;
-                System.out.println("op is :" + op);
                 Content content = StringUtils.getContent(op);
 
                 if ((content.getContent() == null )| content.getHead() == null | content.getTail()==null){
@@ -90,12 +89,10 @@ public class OpenService {
                     Command command = gson.fromJson(content.getContent(), Command.class);
                     operation(command);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                if (e instanceof SocketException) {
-                    break;
+                if (content.getHead().equals(Parameter.FILE_DELETE)){
+                    String[] paths = gson.fromJson(content.getContent(),String[].class);
+                    fileDelete(paths);
                 }
-            }
         }
     }
 
@@ -133,6 +130,7 @@ public class OpenService {
             System.out.println("msg is " + s);
         } catch (IOException e) {
             e.printStackTrace();
+            loopFlag = false;
         }
         return s;
     }
@@ -210,6 +208,13 @@ public class OpenService {
         }
     }
 
+    private static void fileDelete(String[] paths){
+        int originalCount = paths.length;
+        int newCount = FileUtilsKt.deleteFileOrDirs(paths);
+        System.out.println("delete file num is :"+newCount);
+        sendMsgWithParamEND(new String[]{Parameter.COMMAND_RESULT,String.valueOf(newCount)});
+    }
+
     private static void fileOperation(FileCommand command, String jsonSrc) {
         int type = Integer.valueOf(command.getType());
         switch (type) {
@@ -255,15 +260,14 @@ public class OpenService {
         }
     }
 
-
-    private static void newVisionSend(@NotNull String data) {
-        try {
-            byte[] bytes = data.getBytes("UTF-8");
-            connSocket.getOutputStream().write(bytes);
-            connSocket.getOutputStream().flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private static void sendMsgWithParamEND(String[] args){
+        StringBuilder builder = new StringBuilder();
+        for (String arg : args) {
+            builder.append(arg);
+            builder.append("_");
         }
+        builder.append(Parameter.END_FLAG);
+        sendMsg(builder.toString());
     }
 
     private static void send2service() {
