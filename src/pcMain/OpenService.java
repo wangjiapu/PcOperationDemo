@@ -193,6 +193,8 @@ public class OpenService {
                     sendMsg(dir + "_" + Parameter.END_FLAG);
                 }
                 break;
+            case 5://亮度调节
+                break;
             case 7:
                 PcSearch pcSearch = new PcSearch();
                 pcSearch.voiceSearch(command.getDescribe());
