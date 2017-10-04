@@ -47,7 +47,8 @@ public class OpenService {
             /*writer.println("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
             writer.flush();*/
             //sendMsg("|ONLINE|_" + "tjoe" + "_tjoe_" + Parameter.END_FLAG);
-            sendMsg("|ONLINE|_" + "mumu" + "_mumu_" + Parameter.END_FLAG);
+            //sendMsg("|ONLINE|_" + "mumu" + "_mumu_" + Parameter.END_FLAG);
+            sendMsg("|ONLINE|_" + "P" + "_p_" + Parameter.END_FLAG);
             String result = readString();
             System.out.println(result);
             if (StringUtils.startAndEnd(result)) {
@@ -177,7 +178,6 @@ public class OpenService {
                    }
                 }else{
                    //调用移动的方法
-
                     int x=(int)mouseOp.getX();
                     int y=(int)mouseOp.getY();
                     pcMouse.move(x,y);
@@ -196,6 +196,21 @@ public class OpenService {
             case 7:
                 PcSearch pcSearch = new PcSearch();
                 pcSearch.voiceSearch(command.getDescribe());
+                break;
+            case 8:
+                PcVolume pcVolume=new PcVolume();//获取音量调节实例
+                int t=Integer.valueOf(command.getDescribe());
+                if (t>0){
+                    for(int i=t;i>0;i-=2){
+                        pcVolume.vol_Increase();
+                    }
+                }else if (t<0){//循环调节音量
+                    for (int i=t;i<0;i+=2){
+                        pcVolume.vol_Decrease();
+                    }
+                }else{
+                    //音量不变
+                }
                 break;
             default:
                 PcTools tool = new PcTools();
