@@ -9,7 +9,6 @@ import pcOp.*;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 
 public class OpenService {
     private static Socket connSocket;
@@ -19,58 +18,53 @@ public class OpenService {
     private static Gson gson = new Gson();
     private static boolean loopFlag = true;
 
-    public static void main(String[] args) {
-        while (true) {
-            start();
-            try {
-                loopFlag = true;
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
-    private static void start() {
+    public static boolean startSocket(String username,String pwd){
         try {
             connSocket = new Socket(Parameter.SERVER_IP, 10087);
-            OutputStream outputStream = connSocket.getOutputStream();
             InputStream inputStream = connSocket.getInputStream();
 
             os = connSocket.getOutputStream();
             is = connSocket.getInputStream();
             reader = new BufferedReader(new InputStreamReader(inputStream));
-            //向服务端发送消息，我要上线
-            String username = System.getProperty("user.name");
-            System.out.println(username);
-            /*writer.println("|ONLINE|_" + "lzl471954654" + "_Test_" + Parameter.END_FLAG);
-            writer.flush();*/
-            //sendMsg("|ONLINE|_" + "tjoe" + "_tjoe_" + Parameter.END_FLAG);
-            //sendMsg("|ONLINE|_" + "mumu" + "_mumu_" + Parameter.END_FLAG);
-            sendMsg("|ONLINE|_" + "P" + "_p_" + Parameter.END_FLAG);
+            sendMsg("|ONLINE|_" + username + "_"+pwd+"_" + Parameter.END_FLAG);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             String result = readString();
             System.out.println(result);
             if (StringUtils.startAndEnd(result)) {
-
-                /**
-                 * 下线
-                 * 时间限制
-                 * 离线
-                 */
-
-                loop();
+                loopFlag = true;
             } else {  //上线失败
+               loopFlag=false;
                 System.out.println("上线失败，请重新上线。。。");
             }
 
         } catch (IOException e) {
+            loopFlag=false;
+            e.printStackTrace();
+        }
+        return loopFlag;
+    }
+
+    public static void closeSocket(){
+        try {
+            if (connSocket!=null){
+                System.out.println("22222222222");
+                loopFlag=false;
+                os.close();
+                is.close();
+
+                connSocket.close();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void loop() {
-        while (loopFlag) {
+    public static void loop() {
+        while (loopFlag ) {
                 //持续不断的读取服务端消息
                 String op = readString();
                 if (!op.endsWith(Parameter.END_FLAG))
@@ -94,6 +88,7 @@ public class OpenService {
                     String[] paths = gson.fromJson(content.getContent(),String[].class);
                     fileDelete(paths);
                 }
+
         }
     }
 
