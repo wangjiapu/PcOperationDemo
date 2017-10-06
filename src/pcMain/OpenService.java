@@ -92,7 +92,7 @@ public class OpenService {
     }
 
 
-    private static void sendMsg(@NotNull String s) {
+    public static void sendMsg(@NotNull String s) {
         try {
             byte[] bytes = s.getBytes("UTF-8");
             os.write(IntConvertUtils.getIntegerBytes(bytes.length));
@@ -102,7 +102,7 @@ public class OpenService {
         }
     }
 
-    private static String readString() {
+    public static String readString() {
         String s = "";
         try {
             int msgSize = 0;
@@ -152,7 +152,7 @@ public class OpenService {
             case 2:
                 PcScreen pcScreen = new PcScreen(command.getDescribe());
                 if (command.getIsBack()) {
-                    pcScreen.sendScreen(command.getDescribe(), os);
+                    pcScreen.sendScreen(command.getDescribe());
                 } else {
                     pcScreen.shot();
                 }

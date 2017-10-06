@@ -1,9 +1,21 @@
 package pcOp;
 
+
+import beans.FileCommand;
+import beans.FileDescribe;
+import com.google.gson.Gson;
+import pcMain.OpenService;
+import pcMain.Parameter;
+
 import javax.imageio.ImageIO;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * 参数 fn：保存路径+文件名称，ift：文件格式
@@ -45,18 +57,27 @@ public class PcScreen{
     /**
      *        将截取的屏幕回传
      * @param fn           保存路径+文件名称
-     * @param writer       socket输出流
      * @return             成功返回true 失败返回false
      */
-    public boolean sendScreen(String fn,OutputStream writer){
+    public boolean sendScreen(String fn ){
+
         boolean sendOK=false;
         String fName=fn+"."+defaultFormat;
         File file=new File(fName);
-        if (file.exists()){
-            try {
+        List<File> list=new ArrayList<>();
+
+        if (file.exists()) {
+            list.add(file);
+            OpenService.sendMsg(Parameter.FILE_LIST_FLAG + "_" + getFileDescribeArray(list));
+            String s = OpenService.readString();
+            if (s.startsWith(Parameter.FILE_READY)) {
+                //开始发
+            }
+          /*  try {
                 FileInputStream fileInputStream=new FileInputStream(file);
                 System.out.println("======== 开始传输截屏 ========");
-                byte[] bytes=new byte[1024];
+                byte[] bytes=new byte[4096*2];
+
                 int length=0;
                 long progress=0;
                 String temp;
@@ -75,8 +96,26 @@ public class PcScreen{
                 e.printStackTrace();
             }
         }else{
+            //失败回传
             System.out.println("文件"+fName+"不存在！");
+        }*/
         }
-        return sendOK;
+        return false;
+    }
+
+    private String getFileDescribeArray(List<File> fileList){
+        FileCommand command=new FileCommand();
+        List<FileDescribe> data=new ArrayList<>();
+        for (File f:fileList){
+            String name=f.getName().substring(0,f.getName().lastIndexOf("."));
+            String type=f.getName().substring(f.getName().lastIndexOf(".")+1,f.getName().length());
+            data.add(new FileDescribe(name,type,f.length()));
+        }
+
+        command.setDescribe((FileDescribe[]) data.toArray());
+        command.setBack(false);
+        command.setType("21");
+        String s=new Gson().toJson(command);
+        return s;
     }
 }

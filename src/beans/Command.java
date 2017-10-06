@@ -29,6 +29,7 @@ public class Command {
     public void setType(String type) {
         this.type = type;
     }
+
     public boolean getIsBack(){
         return isback;
     }
