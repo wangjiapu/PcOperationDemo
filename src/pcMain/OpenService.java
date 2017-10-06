@@ -51,7 +51,6 @@ public class OpenService {
     public static void closeSocket(){
         try {
             if (connSocket!=null){
-                System.out.println("22222222222");
                 loopFlag=false;
                 os.close();
                 is.close();
@@ -198,11 +197,11 @@ public class OpenService {
                 PcVolume pcVolume=new PcVolume();//获取音量调节实例
                 int t=Integer.valueOf(command.getDescribe());
                 if (t>0){
-                    for(int i=t;i>0;i-=2){
+                    for(int i=t;i>=0;i-=2){
                         pcVolume.vol_Increase();
                     }
                 }else if (t<0){//循环调节音量
-                    for (int i=t;i<0;i+=2){
+                    for (int i=t;i<=0;i+=2){
                         pcVolume.vol_Decrease();
                     }
                 }else{

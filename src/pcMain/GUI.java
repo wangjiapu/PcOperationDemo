@@ -1,7 +1,7 @@
 package pcMain;
 
 import Utils.SaveInfo;
-import sun.rmi.runtime.Log;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,11 +9,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
-
-public class GUI {
+class GUI {
     private JFrame frame;
     private JTextField username;
     private JPasswordField pwd;
@@ -23,12 +23,12 @@ public class GUI {
     private JButton close;
     private JLabel signin;
 
-    private Dialog dialog;
-    private Dialog login_Error_dialog;
-    private Dialog nameError_dialog;
-    private Dialog signinDialog;
-    private Dialog noSigninDialog;
-    private Dialog signin_error_Dialog;
+    private Dialog dialog;//登录成功
+    private Dialog login_Error_dialog;//登录出错
+    private Dialog nameError_dialog;//用户名或密码出错
+    private Dialog signinDialog;//注册
+    private Dialog noSigninDialog;//没有注册
+    private Dialog signin_error_Dialog;//注册出错
     private JTextField username_signin;
     private JPasswordField pwd_signin;
     private Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
@@ -36,7 +36,7 @@ public class GUI {
     private int height = 500;
     private String[] info;
 
-    public GUI(){
+    GUI(){
         info= SaveInfo.getinfo();
         initGUI();
         initClick();
@@ -135,13 +135,13 @@ public class GUI {
     }
 
 
-    private Dialog DialogFactory(Dialog dl,JFrame frame,String t) {
-        dl=new Dialog(frame,"提示",false);
-        dl.setBounds((d.width - width)/2+(height/2), (d.height - height)/2+50 , width/4, height/4);
-        dl.setLayout(new FlowLayout());
+    private Dialog DialogFactory(Dialog dia,JFrame frame,String t) {
+        dia=new Dialog(frame,"提示",false);
+        dia.setBounds((d.width - width)/2+(height/2), (d.height - height)/2+50 , width/4, height/4);
+        dia.setLayout(new FlowLayout());
         JLabel s=new JLabel(t);
-        dl.add(s);
-        return dl;
+        dia.add(s);
+        return dia;
     }
 
     private void initClick() {
@@ -165,6 +165,13 @@ public class GUI {
                                 OpenService.loop();
                             }
                         }).start();
+                        Timer timer=new Timer();
+                        timer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                dialog.setVisible(false);
+                            }
+                        },2000);
                     }
                     else
                         login_Error_dialog.setVisible(true);

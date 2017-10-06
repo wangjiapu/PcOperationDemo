@@ -7,8 +7,7 @@ import java.io.IOException;
  * 音量操作类
  */
 public class PcVolume{
-    private static final String ROOTPATH="F:\\Java\\PcOperationDemo\\src\\tools\\";
-
+    private static final String ROOTPATH="src/tools/";
     /**
      * 设置静音
      * @return
