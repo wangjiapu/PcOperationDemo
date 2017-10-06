@@ -12,6 +12,7 @@ import java.io.*;
 import java.security.*;
 
 public class SaveInfo {
+
     private static final String filepath="consimitor.txt";
     private final static String DES = "DES";
     private final static String ENCODE = "GBK";
@@ -90,14 +91,14 @@ public class SaveInfo {
 
 
 
-    public static String encrypt(String data) throws Exception {
+    private static String encrypt(String data) throws Exception {
         byte[] bt = encrypt(data.getBytes(ENCODE), defaultKey.getBytes(ENCODE));
         String strs = new BASE64Encoder().encode(bt);
         return strs;
     }
 
 
-    public static String decrypt(String data) throws IOException, Exception {
+    private static String decrypt(String data) throws IOException, Exception {
         if (data == null)
             return null;
         BASE64Decoder decoder = new BASE64Decoder();

@@ -1,6 +1,7 @@
 package pcMain;
 
 import Utils.SaveInfo;
+import sun.rmi.runtime.Log;
 
 import javax.swing.*;
 import java.awt.*;
@@ -152,7 +153,7 @@ public class GUI {
         loginbt.addActionListener(e -> {
             String u=username.getText();
             String p= String.valueOf(pwd.getPassword());
-            if (info[0]==null | info[0].equals("")){
+            if (info[0]==null || info[0].equals("")){
                 noSigninDialog.setVisible(true);
             }else{
                 if (u.equals(info[0]) & p.equals(info[1])){
