@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ import java.util.List;
 public class PcScreen{
     private String fileName;
     //private String imageFormat;
-    private String defaultFormat="png";
+    private String defaultFormat="jpg";
     private Dimension dimension=Toolkit.getDefaultToolkit().getScreenSize();
 
     public PcScreen(String fn){
@@ -57,50 +58,47 @@ public class PcScreen{
     /**
      *        将截取的屏幕回传
      * @param fn           保存路径+文件名称
-     * @return             成功返回true 失败返回false
-     */
-    public boolean sendScreen(String fn ){
+     * */
+    public void sendScreen(String fn ){
 
-        boolean sendOK=false;
         String fName=fn+"."+defaultFormat;
         File file=new File(fName);
         List<File> list=new ArrayList<>();
-
+        list.add(file);
         if (file.exists()) {
+            byte[] bytes=new byte[4096];
             list.add(file);
-            OpenService.sendMsg(Parameter.FILE_LIST_FLAG + "_" + getFileDescribeArray(list));
+            OpenService.sendMsg(Parameter.FILE_LIST_FLAG + "_" + getFileDescribeArray(list)+"_"+Parameter.END_FLAG);
+
+            System.out.println(getFileDescribeArray(list));
             String s = OpenService.readString();
             if (s.startsWith(Parameter.FILE_READY)) {
+                System.out.println("开始发送");
                 //开始发
+                list.forEach(file1 -> {
+                    try {
+                        FileInputStream fileInputStream=new FileInputStream(file1);
+                        int count=0;
+                        while (true){
+                            count=fileInputStream.read(bytes);
+                            if (count==-1)
+                                break;
+                            if (count==4096)
+                                OpenService.sendMsg(new String(bytes));
+                            else{
+                                byte[] newbytes=new byte[count];
+                                for(int i=0;i<count;i++){
+                                    newbytes[i]=bytes[i];
+                                }
+                               OpenService.sendMsg(new String(newbytes));
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
             }
-          /*  try {
-                FileInputStream fileInputStream=new FileInputStream(file);
-                System.out.println("======== 开始传输截屏 ========");
-                byte[] bytes=new byte[4096*2];
-
-                int length=0;
-                long progress=0;
-                String temp;
-                while((length=fileInputStream.read(bytes))!=-1){
-                    writer.write(bytes,0,length);
-                    System.out.println(progress);
-                    progress+=length;
-                }
-                System.out.println("======== 传输截屏成功 ========");
-                sendOK=true;
-            } catch (FileNotFoundException e) {
-                System.out.println("文件读取失败");
-                e.printStackTrace();
-            } catch (IOException e) {
-
-                e.printStackTrace();
-            }
-        }else{
-            //失败回传
-            System.out.println("文件"+fName+"不存在！");
-        }*/
         }
-        return false;
     }
 
     private String getFileDescribeArray(List<File> fileList){
@@ -111,8 +109,8 @@ public class PcScreen{
             String type=f.getName().substring(f.getName().lastIndexOf(".")+1,f.getName().length());
             data.add(new FileDescribe(name,type,f.length()));
         }
-
-        command.setDescribe((FileDescribe[]) data.toArray());
+        int size=data.size();
+        command.setDescribe((data.toArray(new FileDescribe[size])));
         command.setBack(false);
         command.setType("21");
         String s=new Gson().toJson(command);
