@@ -64,7 +64,6 @@ public class PcScreen{
         String fName=fn+"."+defaultFormat;
         File file=new File(fName);
         List<File> list=new ArrayList<>();
-        list.add(file);
         if (file.exists()) {
             byte[] bytes=new byte[4096];
             list.add(file);
@@ -84,13 +83,15 @@ public class PcScreen{
                             if (count==-1)
                                 break;
                             if (count==4096)
-                                OpenService.sendMsg(new String(bytes));
+                                OpenService.sendBytes(bytes);
+                                //OpenService.sendMsg(new String(bytes));
                             else{
                                 byte[] newbytes=new byte[count];
                                 for(int i=0;i<count;i++){
                                     newbytes[i]=bytes[i];
                                 }
-                               OpenService.sendMsg(new String(newbytes));
+                                OpenService.sendBytes(newbytes);
+                               //OpenService.sendMsg(new String(newbytes));
                             }
                         }
                     } catch (Exception e) {

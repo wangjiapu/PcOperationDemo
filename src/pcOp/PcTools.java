@@ -31,7 +31,7 @@ public class PcTools{
     "regedit.exe","calc","cliconfg","cleanmgr","osk","odbcad32","logoff",
             "fsmgmt.msc","utilman","shutdown -s -t 30","shutdown -r -t 30","shutdown -a"};
 
-    private static final String[] closeCmd=new String[]{"taskmgr", "wordpad.exe","mspaint.exe",
+    private static final String[] closeCmd=new String[]{"taskmgr.exe", "wordpad.exe","mspaint.exe",
            "setup_wm.exe","notepad.exe","Narrator.exe","explorer.exe",
             "regedit.exe","Calculator.exe","cliconfg.exe","cleanmgr.exe","osk.exe","odbcad32.exe","logoff.exe",
             "fsmgmt.msc.exe","utilman.exe"};

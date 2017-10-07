@@ -102,6 +102,14 @@ public class OpenService {
         }
     }
 
+    public static void sendBytes(@NotNull byte[] bytes){
+        try {
+            os.write(bytes);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
     public static String readString() {
         String s = "";
         try {
