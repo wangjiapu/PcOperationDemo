@@ -16,9 +16,12 @@ public class OpenService {
     private static InputStream is;
     private static BufferedReader reader;
     private static Gson gson = new Gson();
-    private static boolean loopFlag = true;
+    public static boolean loopFlag = true;
+
+
 
     public static boolean startSocket(String username,String pwd){
+        boolean f=false;
         try {
             connSocket = new Socket(Parameter.SERVER_IP, 10087);
             InputStream inputStream = connSocket.getInputStream();
@@ -54,7 +57,6 @@ public class OpenService {
                 loopFlag=false;
                 os.close();
                 is.close();
-
                 connSocket.close();
             }
         } catch (Exception e) {

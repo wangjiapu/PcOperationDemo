@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Class-Path: gson-2.8.0.jar kotlin-stdlib.jar kotlin-reflect.jar kotlin
+ -test.jar kotlin-stdlib-jre7.jar kotlin-stdlib-jre8.jar
+Main-Class: Main
+

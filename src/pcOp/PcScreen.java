@@ -68,7 +68,6 @@ public class PcScreen{
             byte[] bytes=new byte[4096];
             list.add(file);
             OpenService.sendMsg(Parameter.FILE_LIST_FLAG + "_" + getFileDescribeArray(list)+"_"+Parameter.END_FLAG);
-
             System.out.println(getFileDescribeArray(list));
             String s = OpenService.readString();
             if (s.startsWith(Parameter.FILE_READY)) {

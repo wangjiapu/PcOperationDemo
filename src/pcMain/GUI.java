@@ -162,7 +162,17 @@ class GUI {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                OpenService.loop();
+                                while (true){
+                                    OpenService.loop();
+                                    if (!OpenService.loopFlag){
+                                        OpenService.startSocket(u,p);
+                                    }
+                                    try {
+                                        Thread.sleep(2000);
+                                    } catch (InterruptedException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                }
                             }
                         }).start();
                         Timer timer=new Timer();
