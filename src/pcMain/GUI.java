@@ -158,6 +158,7 @@ class GUI {
             }else{
                 if (u.equals(info[0]) & p.equals(info[1])){
                     if (OpenService.startSocket(u,p)){
+
                         dialog.setVisible(true);
                         new Thread(new Runnable() {
                             @Override
@@ -180,6 +181,7 @@ class GUI {
                             @Override
                             public void run() {
                                 dialog.setVisible(false);
+                                frame.setExtendedState(JFrame.ICONIFIED);
                             }
                         },2000);
                     }

@@ -1,5 +1,7 @@
 package pcMain;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Parameter {
     /*
   * HEART_BEAT            心跳
@@ -17,6 +19,7 @@ public class Parameter {
   * UDP_MODE              UDP模式
   * TCP_MODE              TCP模式
   * */
+
     public static final String HEATR_BEAT = "|BEAT|";
     public static final String MAKE_HOLE = "|HOLE|";
     public static final String HOLE_SUCCESS = "|HOLE@SUCCESS|";
