@@ -1,8 +1,9 @@
 package beans;
 
+import java.util.Map;
+
 public class MouseOpInfo {
-    private float X;
-    private float Y;
+    private Map<Integer,Integer> map;
     private boolean click;
     private boolean singleClick;
     private boolean doubleClick;
@@ -18,8 +19,15 @@ public class MouseOpInfo {
         this.click = click;
     }
 
+    public Map<Integer, Integer> getMap() {
+        return map;
+    }
 
-    public float getX() {
+    public void setMap(Map<Integer, Integer> map) {
+        this.map = map;
+    }
+
+/* public float getX() {
         return X;
     }
 
@@ -33,7 +41,7 @@ public class MouseOpInfo {
 
     public void setY(float y) {
         Y = y;
-    }
+    }*/
 
     public boolean isSingleClick() {
         return singleClick;

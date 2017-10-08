@@ -3,57 +3,6 @@ package pcOp;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-
-/*
-public class PcMouse{
-    public static void main(String[]args){
-        PM mouse=new PM();
-        Scanner input=new Scanner(System.in);
-        String str=input.nextLine();
-        while (str!="-1") {
-            switch (str){
-                case "move" :
-                    mouse.move(-600, 300);
-                    break;
-                case "singleClick" :
-                    mouse.singleClick();
-                    break;
-                case "doubleClick" :
-                    mouse.doubleClick();
-                    break;
-                case "rightClick" :
-                    mouse.rightClick();
-                    break;
-                case "wheel" :
-                    mouse.wheel("up");
-                    break;
-                case "up" :
-                    mouse.direction("up");
-                    break;
-                case "down" :
-                    mouse.direction("down");
-                    break;
-                case "left" :
-                    mouse.direction("left");
-                    break;
-                case "right" :
-                    mouse.direction("right");
-                    break;
-                case "home" :
-                    mouse.direction("home");
-                    break;
-                case "end" :
-                    mouse.direction("end");
-                    break;
-            }
-            str=input.nextLine();
-        }
-
-
-    }
-}
-*/
-
 public class PcMouse {
     private Dimension dimension;
     private Robot robot;
@@ -75,7 +24,7 @@ public class PcMouse {
      */
     public void move(int x,int y){
         point = MouseInfo.getPointerInfo().getLocation();
-        point.x += -x;
+        point.x += x;
         point.y += y;
         robot.mouseMove(point.x,point.y);       /**移动鼠标到x,y位置*/
     }

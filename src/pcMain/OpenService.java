@@ -9,6 +9,7 @@ import pcOp.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Map;
 
 public class OpenService {
     private static Socket connSocket;
@@ -182,9 +183,15 @@ public class OpenService {
                    }
                 }else{
                    //调用移动的方法
-                    int x=(int)mouseOp.getX();
-                    int y=(int)mouseOp.getY();
-                    pcMouse.move(x,y);
+                    Map<Integer,Integer> map=mouseOp.getMap();
+                    for (Map.Entry<Integer,Integer> entry:map.entrySet()){
+                        try {
+                            Thread.sleep(25);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        pcMouse.move(entry.getKey(),entry.getValue());
+                    }
                 }
                 break;
             case 4://获取磁盘详细信息
