@@ -5,16 +5,24 @@ import java.io.IOException;
 
 
 public class PcLuminance{
-    private static final String ROOTPATH="F:\\Java\\PcOperationDemo\\src\\tools\\ClickMonitorDDC.exe brightness";
+    private static final String ROOTPATH="src/tools/ClickMonitorDDC.exe brightness";
 
     public void brightnessOperation(String type){
+        if (type.equals("-1")){
+            closeB();
+            return;
+        }
         try {
-            System.out.println(ROOTPATH + type);
-            Process process=Runtime.getRuntime().exec(ROOTPATH + type);
-            System.out.println(process.waitFor());
+            Runtime.getRuntime().exec(ROOTPATH + type);
         } catch (IOException e) {
+            e.printStackTrace();
             System.out.println(e.toString());
-        } catch (InterruptedException e) {
+        }
+    }
+    public void closeB(){
+        try {
+            Runtime.getRuntime().exec("cmd /c taskkill /im ClickMonitorDDC.exe /f");
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

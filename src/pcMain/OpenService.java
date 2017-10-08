@@ -205,6 +205,8 @@ public class OpenService {
                 }
                 break;
             case 5://亮度调节
+                PcLuminance pcLuminance=new PcLuminance();
+                pcLuminance.brightnessOperation(command.getDescribe());
                 break;
             case 7:
                 PcSearch pcSearch = new PcSearch();
