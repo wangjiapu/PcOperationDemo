@@ -20,4 +20,8 @@ public class IntConvertUtils {
         }
         return s;
     }
+
+    public static int getType(byte[] d){
+        return -1;
+    }
 }

@@ -173,7 +173,7 @@ public class OpenService {
                 String mouseinfo=command.getDescribe();
                 MouseOpInfo mouseOp=gson.fromJson(mouseinfo,MouseOpInfo.class);
                 PcMouse pcMouse=new PcMouse();
-                if (mouseOp.isClick()){//点击了
+                if (mouseOp.isClick() && mouseOp.getMap().size()<2){//点击了
                    if (mouseOp.isSingleClick()){//单击
                         pcMouse.singleClick();
                    }else if (mouseOp.isRightClick()){//右击
