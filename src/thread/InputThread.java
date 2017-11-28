@@ -1,11 +1,16 @@
 package thread;
 
+import Utils.DataUtil;
 import Utils.IntConvertUtils;
 import beans.Command;
+import com.google.gson.Gson;
+import pcMain.SocketMeager;
 import pcOp.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 
 
 /**
@@ -15,44 +20,39 @@ import java.io.InputStream;
 public class InputThread extends Thread{
     private static final byte[] singleByte=new byte[1];
     private static final byte[] doubleByte=new byte[2];
-    @Override
-    public void run() {
-        //循坏读取
-        super.run();
+    private static final Gson gson=new Gson();
+
+    private static final PipedOutputStream out=new PipedOutputStream();
+    private static final PipedInputStream input=new PipedInputStream();
+
+    private PipedInputStream pis;
+    public InputThread(PipedInputStream p){
+        this.pis=p;
     }
-
-
-
     /**
-     * 将文件与命令分流到不同的线程中
+     * Shunt files and commands into different threads
      */
     private void dispach(InputStream stream) throws IOException {
-
         //Unified operation
-
         stream.read(singleByte);
-        int type=IntConvertUtils.getType(singleByte);
-        stream.read(doubleByte);
-        int  dataSize=IntConvertUtils.getIntegerByByteArray(doubleByte);
-        if (dataSize<=0){
-            return;
-        }
-        String data=read(stream,dataSize);
-
-        switch (type){
+        byte type=singleByte[0];
+        switch (DataUtil.getType(type)){
             case -1://no dispach
-
-                /*stream.read(doubleByte);
+                stream.read(doubleByte);
                 int  dataSize=IntConvertUtils.getIntegerByByteArray(doubleByte);
                 if (dataSize<=0){
                     return;
                 }
-                String s=read(stream,dataSize);
-*/
+                String data=read(stream,dataSize);
+                Command command = gson.fromJson(data, Command.class);
+                operation(command);
                 break;
-            case 0://命令,The command that needs to be returned
+            case 0://登录处理
+
                 break;
             case 1://文件
+                break;
+            case 2://需要返回的命令
                 break;
         }
     }
@@ -71,7 +71,6 @@ public class InputThread extends Thread{
             dataBytes[i] = (byte) stream.read();
             i++;
         }
-
         return new String(dataBytes);
     }
 

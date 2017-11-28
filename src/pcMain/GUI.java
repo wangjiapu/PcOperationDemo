@@ -1,6 +1,8 @@
 package pcMain;
 
 import Utils.SaveInfo;
+import thread.InputThread;
+import thread.OutputThread;
 
 
 import javax.swing.*;
@@ -9,11 +11,27 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 class GUI {
+    /**
+     * socket生产者
+     */
+    private static final PipedOutputStream out=new PipedOutputStream();
+    private static final PipedInputStream input=new PipedInputStream();
+
+    /**
+     * socket 消费者
+     */
+    private static final PipedOutputStream  pos=new PipedOutputStream();
+    private static final PipedInputStream pis=new PipedInputStream();
+
     private JFrame frame;
     private JTextField username;
     private JPasswordField pwd;
@@ -43,6 +61,16 @@ class GUI {
     }
 
     private void initGUI() {
+
+        try {
+            input.connect(out);
+
+            pis.connect(pos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         JPanel p1=new JPanel(new GridLayout(1,3,10,1));
         JLabel label=new JLabel("用户名");
 
@@ -160,7 +188,13 @@ class GUI {
                     if (OpenService.startSocket(u,p)){
 
                         dialog.setVisible(true);
-                        new Thread(new Runnable() {
+                        SocketMeager socketMeager=new SocketMeager(out,pis);//生产者
+                        InputThread inputThread=new InputThread(input);//消费者
+                        OutputThread outputThread=new OutputThread(pos);
+                        socketMeager.start();
+                        inputThread.start();
+                        outputThread.start();
+                      /*  new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 while (true){
@@ -175,7 +209,7 @@ class GUI {
                                     }
                                 }
                             }
-                        }).start();
+                        }).start();*/
                         Timer timer=new Timer();
                         timer.schedule(new TimerTask() {
                             @Override
