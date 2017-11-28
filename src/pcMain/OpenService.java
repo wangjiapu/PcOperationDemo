@@ -9,6 +9,8 @@ import pcOp.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class OpenService {
@@ -90,10 +92,61 @@ public class OpenService {
                     String[] paths = gson.fromJson(content.getContent(),String[].class);
                     fileDelete(paths);
                 }
+                if(content.getHead().equals("|GET@FILE|")){
+                    getFile(content);
+                }
 
         }
     }
 
+
+    public static void getFile(Content content){
+        List<FileDescribe> list = new LinkedList<>();
+        FileInfo[] fileInfos = gson.fromJson(content.getContent(),FileInfo[].class);
+        for (FileInfo fileInfo : fileInfos) {
+            File file = new File(fileInfo.getPath());
+            FileDescribe describe = new FileDescribe();
+            describe.setFileSize(file.length());
+            String name = file.getName().substring(0,file.getName().lastIndexOf("."));
+            String type = file.getName().substring(file.getName().lastIndexOf(".")+1,file.getName().length());
+            describe.setFileName(name);
+            describe.setFileType(type);
+            list.add(describe);
+        }
+        String command = Parameter.FILE_LIST_FLAG+"_"+gson.toJson(list);
+        sendMsgWithParamEND(new String[]{command});
+        String result = readString();
+        System.out.println("result :"+result);
+        if (result.startsWith(Parameter.FILE_READY)){
+            try
+            {
+                for (FileInfo fileInfo : fileInfos) {
+                    File file = new File(fileInfo.getPath());
+                    int count = 0;
+                    FileInputStream inputStream = new FileInputStream(file);
+                    while(true){
+                        byte[] bytes = new byte[4096];
+                        count = inputStream.read(bytes);
+                        if(count==-1)
+                            break;
+                        if(count==4096)
+                            sendBytes(bytes);
+                        else{
+                            byte[] newBytes = new byte[count];
+                            int i = 0;
+                            for (i = 0;i<count;i++)
+                                newBytes[i] = bytes[i];
+                            sendBytes(newBytes);
+                        }
+                    }
+                    inputStream.close();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+                loopFlag = false;
+            }
+        }
+    }
 
     public static void sendMsg(@NotNull String s) {
         try {
