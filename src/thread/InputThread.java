@@ -29,12 +29,29 @@ public class InputThread extends Thread{
     public InputThread(PipedInputStream p){
         this.pis=p;
     }
+
+    @Override
+    public void run() {
+        inputLoop();
+    }
+
+    private void inputLoop() {
+        while (true){
+            try {
+                dispach(pis);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Shunt files and commands into different threads
      */
     private void dispach(InputStream stream) throws IOException {
         //Unified operation
-        stream.read(singleByte);
+        int size=stream.read(singleByte);
+        System.out.println("dispach,singleByte,size:"+size);
         byte type=singleByte[0];
         switch (DataUtil.getType(type)){
             case -1://no dispach
@@ -46,9 +63,6 @@ public class InputThread extends Thread{
                 String data=read(stream,dataSize);
                 Command command = gson.fromJson(data, Command.class);
                 operation(command);
-                break;
-            case 0://登录处理
-
                 break;
             case 1://文件
                 break;

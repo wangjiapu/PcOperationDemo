@@ -13,7 +13,6 @@ object  DataUtil {
             return 0
         }else{
             when(b){
-               // 0x00.toByte() -> return 0
                 0x10.toByte() -> return 1
                 0X20.toByte() -> return 2
             }

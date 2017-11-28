@@ -23,7 +23,7 @@ public  class SocketMeager extends Thread {
     private InputStream is;
     private OutputStream os;
 
-    private static Socket mSocket;
+  //  private static Socket mSocket;
 
     SocketMeager(PipedOutputStream pout,PipedInputStream is){
         this.pis=is;
@@ -46,7 +46,7 @@ public  class SocketMeager extends Thread {
     private void startSocket(String username, String pwd){
 
         try {
-            mSocket = new Socket(Parameter.SERVER_IP, 10087);
+            Socket mSocket = new Socket(Parameter.SERVER_IP, 10087);
             /**
              * 处理1， 登录
              */
@@ -65,13 +65,14 @@ public  class SocketMeager extends Thread {
                 e.printStackTrace();
             }
 
-            is.read(bytes);
+            int size=is.read(bytes);
+            System.out.println("server return size;"+size);
             if (DataUtil.getType(bytes[0])==1) {
                 loopFlag = true;
                 loop();
             } else {  //上线失败
                 loopFlag=false;
-                System.out.println("上线失败，请重新上线。。。");
+                System.out.println("Fail online, please relive。。。");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -86,12 +87,14 @@ public  class SocketMeager extends Thread {
         while (loopFlag){
             try {
                 byte[] bytes=new byte[1024];
-                is.read(bytes);
+                int size=is.read(bytes);
+                System.out.println("pipe1,size:"+size);
                 out.write(bytes);
                 out.flush();
 
                 byte[] outbyte=new byte[1024];
-                pis.read(outbyte);
+                int size2=pis.read(outbyte);
+                System.out.println("pipe2,size:"+size2);
                 os.write(outbyte);
                 os.flush();
             } catch (IOException e) {
