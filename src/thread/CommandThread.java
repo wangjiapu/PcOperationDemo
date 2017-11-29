@@ -52,7 +52,7 @@ public class CommandThread extends Thread {
                 try {
                     cmdSize = stream.read(HandleUtil.DOUBLEBYTE);
                     System.out.println("need return command size:"+cmdSize);
-                    int  dataSize= IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
+                    short  dataSize= IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
                     if (dataSize<=0){
                         return;
                     }

@@ -20,7 +20,7 @@ public final class HandleUtil {
      * @return change bytes to String
      * @throws IOException
      */
-    public static String read(InputStream stream, int dataSize) throws IOException {
+    public static String read(InputStream stream, short dataSize) throws IOException {
         int i = 0;
         byte[] dataBytes = new byte[dataSize];
         while (i < dataSize) {

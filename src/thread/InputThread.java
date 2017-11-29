@@ -58,7 +58,7 @@ public class InputThread extends Thread{
             case 0x20://this command no return
                 int size_1 = stream.read(HandleUtil.DOUBLEBYTE);
                 System.out.println("no dispach size:"+size_1);
-                int  dataSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
+                short  dataSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
                 if (dataSize<=0){
                     return;
                 }
@@ -71,7 +71,7 @@ public class InputThread extends Thread{
             case 0x22:
                 int size2=stream.read(HandleUtil.DOUBLEBYTE);
                 System.out.println("need return cmd size2:"+size2);
-                int cmdSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
+                short cmdSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
                 if (cmdSize<=0){
                     return;
                 }
@@ -85,7 +85,7 @@ public class InputThread extends Thread{
            default:
                int size3=stream.read(HandleUtil.DOUBLEBYTE);
                System.out.println("file size:"+size3);
-               int fileSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
+               short fileSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
                if (fileSize<=0){
                    return;
                }
