@@ -32,7 +32,15 @@ object ProtocolField {
      *  Command operation Fields
      * */
 
-    const val command = 0x20.toByte()
-    const val commandneedreturn = 0x21.toByte()
+    const val command =            0x20.toByte()
+    const val commandreturn =      0x21.toByte()
+    const val cmdScreenGetOk =     0x22.toByte()
+    const val cmdScreenBody =      0x23.toByte()
 
+
+
+    /**
+     *
+     */
+    const val realtimescreen= 0xff.toByte()
 }

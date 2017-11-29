@@ -214,12 +214,12 @@ public class OpenService {
                 break;
 
             case 2:
-                PcScreen pcScreen = new PcScreen(command.getDescribe());
+               /* PcScreen pcScreen = new PcScreen(command.getDescribe());
                 if (command.getIsBack()) {
                     pcScreen.sendScreen(command.getDescribe());
                 } else {
                     pcScreen.shot();
-                }
+                }*/
                 break;
 
             case 3://鼠标操作

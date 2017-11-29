@@ -1,8 +1,8 @@
 package thread;
 
+import Utils.HandleUtil;
 import Utils.IntConvertUtils;
 import beans.Command;
-import com.google.gson.Gson;
 import pcOp.*;
 
 import java.io.IOException;
@@ -16,11 +16,6 @@ import java.io.PipedOutputStream;
  * Implementation of different command event handling
  */
 public class InputThread extends Thread{
-    private static final byte[] singleByte=new byte[1];
-    private static final byte[] doubleByte=new byte[2];
-    private static final Gson gson=new Gson();
-
-
     private PipedInputStream pis;
     private PipedOutputStream mPos2cmd;
     private PipedOutputStream mPos3file;
@@ -50,44 +45,47 @@ public class InputThread extends Thread{
      * Shunt files and commands into different threads
      */
     private void dispach(InputStream stream) throws IOException {
-        int size=stream.read(singleByte);
+        int size=stream.read(HandleUtil.SINGLEBYTE);
         System.out.println("dispach,singleByte,size:"+size);
-        byte type=singleByte[0];
+        byte type=HandleUtil.SINGLEBYTE[0];
         switch (type){
-            case 0x20://this command no return
-                int size_1 = stream.read(doubleByte);
-                System.out.println("no dispach size:"+size_1);
-                int  dataSize=IntConvertUtils.getIntegerByByteArray(doubleByte);
-                if (dataSize<=0){
-                    return;
-                }
-                String data=read(stream,dataSize);
-                Command command = gson.fromJson(data, Command.class);
-                operation(command);
-                break;
-            case 0x21://need return
-                int size2=stream.read(doubleByte);
-                System.out.println("need return cmd size2:"+size2);
-                int cmdSize=IntConvertUtils.getIntegerByByteArray(doubleByte);
-                if (cmdSize<=0){
-                    return;
-                }
-                byte[] cmd=new byte[cmdSize];
-                int send2nextSize=stream.read(cmd);
-                System.out.println("send to commandThread size:"+send2nextSize);
-                mPos2cmd.write(cmd);
-                mPos2cmd.flush();
-                break;
             case 0x18:
             case 0x19:
             case 0x1a:
                 mPos3file.write(type);
                 mPos3file.flush();
                 break;
+            case 0x20://this command no return
+                int size_1 = stream.read(HandleUtil.DOUBLEBYTE);
+                System.out.println("no dispach size:"+size_1);
+                int  dataSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
+                if (dataSize<=0){
+                    return;
+                }
+                String data=HandleUtil.read(stream,dataSize);
+
+                Command command = HandleUtil.gson.fromJson(data, Command.class);
+                operation(command);
+                break;
+            case 0x21://need return
+            case 0x22:
+                int size2=stream.read(HandleUtil.DOUBLEBYTE);
+                System.out.println("need return cmd size2:"+size2);
+                int cmdSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
+                if (cmdSize<=0){
+                    return;
+                }
+                byte[] cmd=new byte[cmdSize];
+                int send2nextSize=stream.read(cmd);
+                System.out.println("send to commandThread size:"+send2nextSize);
+                mPos2cmd.write(type);
+                mPos2cmd.write(cmd);
+                mPos2cmd.flush();
+                break;
            default:
-               int size3=stream.read(doubleByte);
+               int size3=stream.read(HandleUtil.DOUBLEBYTE);
                System.out.println("file size:"+size3);
-               int fileSize=IntConvertUtils.getIntegerByByteArray(doubleByte);
+               int fileSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
                if (fileSize<=0){
                    return;
                }
@@ -101,24 +99,6 @@ public class InputThread extends Thread{
         }
 
     }
-
-    /**
-     * read data from inputStream
-     * @param stream:socket inputStream
-     * @param dataSize:
-     * @return change bytes to String
-     * @throws IOException
-     */
-    private String read(InputStream stream, int dataSize) throws IOException {
-        int i = 0;
-        byte[] dataBytes = new byte[dataSize];
-        while (i < dataSize) {
-            dataBytes[i] = (byte) stream.read();
-            i++;
-        }
-        return new String(dataBytes);
-    }
-
 
     /**
      * Operation without return data
@@ -139,11 +119,7 @@ public class InputThread extends Thread{
 
             case 2:
                 PcScreen pcScreen = new PcScreen(command.getDescribe());
-                if (command.getIsBack()) {
-                    pcScreen.sendScreen(command.getDescribe());
-                } else {
-                    pcScreen.shot();
-                }
+                pcScreen.shot();
                 break;
 
             case 5://亮度调节
