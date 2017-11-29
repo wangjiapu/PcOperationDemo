@@ -1,10 +1,8 @@
 package thread;
 
-import Utils.DataUtil;
 import Utils.IntConvertUtils;
 import beans.Command;
 import com.google.gson.Gson;
-import pcMain.SocketMeager;
 import pcOp.*;
 
 import java.io.IOException;
@@ -22,12 +20,15 @@ public class InputThread extends Thread{
     private static final byte[] doubleByte=new byte[2];
     private static final Gson gson=new Gson();
 
-    private static final PipedOutputStream out=new PipedOutputStream();
-    private static final PipedInputStream input=new PipedInputStream();
 
     private PipedInputStream pis;
-    public InputThread(PipedInputStream p){
+    private PipedOutputStream mPos2cmd;
+    private PipedOutputStream mPos3file;
+
+    public InputThread(PipedInputStream p,PipedOutputStream p2,PipedOutputStream p3){
         this.pis=p;
+        this.mPos2cmd=p2;
+        this.mPos3file=p3;
     }
 
     @Override
@@ -49,13 +50,13 @@ public class InputThread extends Thread{
      * Shunt files and commands into different threads
      */
     private void dispach(InputStream stream) throws IOException {
-        //Unified operation
         int size=stream.read(singleByte);
         System.out.println("dispach,singleByte,size:"+size);
         byte type=singleByte[0];
-        switch (DataUtil.getType(type)){
-            case -1://no dispach
-                stream.read(doubleByte);
+        switch (type){
+            case 0x20://this command no return
+                int size_1 = stream.read(doubleByte);
+                System.out.println("no dispach size:"+size_1);
                 int  dataSize=IntConvertUtils.getIntegerByByteArray(doubleByte);
                 if (dataSize<=0){
                     return;
@@ -64,11 +65,41 @@ public class InputThread extends Thread{
                 Command command = gson.fromJson(data, Command.class);
                 operation(command);
                 break;
-            case 1://文件
+            case 0x21://need return
+                int size2=stream.read(doubleByte);
+                System.out.println("need return cmd size2:"+size2);
+                int cmdSize=IntConvertUtils.getIntegerByByteArray(doubleByte);
+                if (cmdSize<=0){
+                    return;
+                }
+                byte[] cmd=new byte[cmdSize];
+                int send2nextSize=stream.read(cmd);
+                System.out.println("send to commandThread size:"+send2nextSize);
+                mPos2cmd.write(cmd);
+                mPos2cmd.flush();
                 break;
-            case 2://需要返回的命令
+            case 0x18:
+            case 0x19:
+            case 0x1a:
+                mPos3file.write(type);
+                mPos3file.flush();
                 break;
+           default:
+               int size3=stream.read(doubleByte);
+               System.out.println("file size:"+size3);
+               int fileSize=IntConvertUtils.getIntegerByByteArray(doubleByte);
+               if (fileSize<=0){
+                   return;
+               }
+               byte[] file=new byte[fileSize];
+               int ss=stream.read(file);
+               System.out.println("file size:"+ss);
+               mPos3file.write(type);
+               mPos3file.write(file);
+               mPos3file.flush();
+
         }
+
     }
 
     /**

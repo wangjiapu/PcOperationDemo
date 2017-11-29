@@ -31,6 +31,8 @@ object ProtocolField {
     /**
      *  Command operation Fields
      * */
+
     const val command = 0x20.toByte()
+    const val commandneedreturn = 0x21.toByte()
 
 }

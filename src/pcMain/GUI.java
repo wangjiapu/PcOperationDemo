@@ -1,6 +1,8 @@
 package pcMain;
 
 import Utils.SaveInfo;
+import thread.CommandThread;
+import thread.FileThread;
 import thread.InputThread;
 import thread.OutputThread;
 
@@ -20,17 +22,18 @@ import java.util.TimerTask;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 class GUI {
-    /**
-     * socket生产者
-     */
-    private static final PipedOutputStream out=new PipedOutputStream();
-    private static final PipedInputStream input=new PipedInputStream();
 
-    /**
-     * socket 消费者
-     */
-    private static final PipedOutputStream  pos=new PipedOutputStream();
-    private static final PipedInputStream pis=new PipedInputStream();
+    private static  PipedInputStream[] pises;
+    private static PipedOutputStream[] poses;
+
+    static {
+        pises=new PipedInputStream[6];
+        poses=new PipedOutputStream[6];
+        for (int i=0;i<pises.length;i++){
+            pises[i]=new PipedInputStream();
+            poses[i]=new PipedOutputStream();
+        }
+    }
 
     private JFrame frame;
     private JTextField username;
@@ -61,15 +64,6 @@ class GUI {
     }
 
     private void initGUI() {
-
-        try {
-            input.connect(out);
-
-            pis.connect(pos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
 
         JPanel p1=new JPanel(new GridLayout(1,3,10,1));
         JLabel label=new JLabel("用户名");
@@ -173,6 +167,9 @@ class GUI {
     }
 
     private void initClick() {
+
+        buildPipe();
+
         dialogClick(dialog);
         dialogClick(signinDialog);
         dialogClick(noSigninDialog);
@@ -188,28 +185,8 @@ class GUI {
                     if (OpenService.startSocket(u,p)){
 
                         dialog.setVisible(true);
-                        SocketMeager socketMeager=new SocketMeager(out,pis);//生产者
-                        InputThread inputThread=new InputThread(input);//消费者
-                        OutputThread outputThread=new OutputThread(pos);
-                        socketMeager.start();
-                        inputThread.start();
-                        outputThread.start();
-                      /*  new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                while (true){
-                                    OpenService.loop();
-                                    if (!OpenService.loopFlag){
-                                        OpenService.startSocket(u,p);
-                                    }
-                                    try {
-                                        Thread.sleep(2000);
-                                    } catch (InterruptedException e1) {
-                                        e1.printStackTrace();
-                                    }
-                                }
-                            }
-                        }).start();*/
+                        StartThreadTree();
+
                         Timer timer=new Timer();
                         timer.schedule(new TimerTask() {
                             @Override
@@ -249,6 +226,40 @@ class GUI {
                 signinDialog.setVisible(false);
             }
         });
+    }
+
+    /**
+     * build pipeStream and start thread tree
+     */
+    private void StartThreadTree() {
+
+
+        SocketMeager socketMeager=new SocketMeager(poses[0],pises[1]);
+
+        InputThread inputThread=new InputThread(pises[0],poses[2],poses[3]);
+        OutputThread outputThread=new OutputThread(poses[1],pises[4],pises[5]);
+
+        CommandThread commandThread=new CommandThread(pises[2],poses[5]);
+        FileThread fileThread=new FileThread(pises[3],poses[4]);
+
+
+        socketMeager.start();
+        inputThread.start();
+        outputThread.start();
+        commandThread.start();
+        fileThread.start();
+    }
+
+
+    private void buildPipe(){
+
+        for (int i=0;i<pises.length;i++){
+            try {
+                pises[i].connect(poses[i]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void dialogClick(Dialog dialog) {

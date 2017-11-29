@@ -6,5 +6,8 @@ import java.io.PipedOutputStream
 /**
  * Send data to the server
  */
-class OutputThread(var pos:PipedOutputStream) :Thread(){
+class OutputThread(val pos:PipedOutputStream,val mPisfromFile:PipedInputStream,
+                   val mPisfromCmd:PipedInputStream) :Thread(){
+
+
 }
