@@ -2,7 +2,7 @@ package pcMain;
 
 import Utils.SaveInfo;
 import thread.CommandThread;
-import thread.FileThread;
+import thread.FileInputThread;
 import thread.InputThread;
 import thread.OutputThread;
 
@@ -14,7 +14,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Timer;
@@ -239,14 +238,14 @@ class GUI {
         InputThread inputThread=new InputThread(pises[0],poses[2],poses[3]);
         OutputThread outputThread=new OutputThread(poses[1],pises[4],pises[5]);
         CommandThread commandThread=new CommandThread(pises[2],poses[5]);
-        FileThread fileThread=new FileThread(pises[3],poses[4]);
+        FileInputThread fileInputThread =new FileInputThread(pises[3],poses[4]);
 
 
         socketMeager.start();
         inputThread.start();
         outputThread.start();
         commandThread.start();
-        fileThread.start();
+        fileInputThread.start();
     }
 
 
