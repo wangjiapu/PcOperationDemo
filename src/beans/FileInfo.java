@@ -5,6 +5,7 @@ public class FileInfo {
     private String name;
     private boolean type;
 
+
     public String getPath() {
         return path;
     }

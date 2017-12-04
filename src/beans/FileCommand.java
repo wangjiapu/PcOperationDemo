@@ -5,24 +5,23 @@ package beans;
  */
 
 public class FileCommand<T>{
-    private String type;
+    private String path;
     private FileDescribe[] describe;
-    private boolean isBack = false;
+
 
     public FileCommand(){}
 
     public FileCommand(String type, FileDescribe[] describe, boolean isBack) {
-        this.type = type;
+        this.path = type;
         this.describe = describe;
-        this.isBack = isBack;
     }
 
     public String getType() {
-        return type;
+        return path;
     }
 
     public void setType(String type) {
-        this.type = type;
+        this.path = type;
     }
 
     public FileDescribe[] getDescribe() {
@@ -33,11 +32,4 @@ public class FileCommand<T>{
         this.describe = describe;
     }
 
-    public boolean isBack() {
-        return isBack;
-    }
-
-    public void setBack(boolean back) {
-        isBack = back;
-    }
 }

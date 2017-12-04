@@ -49,6 +49,12 @@ public class InputThread extends Thread{
         System.out.println("dispach,singleByte,size:"+size);
         byte type=HandleUtil.SINGLEBYTE[0];
         switch (type){
+            case 0x10:
+            case 0x12:
+
+            case 0x13:
+            case 0x15:
+
             case 0x18:
             case 0x19:
             case 0x1a:

@@ -10,4 +10,5 @@ class OutputThread(val pos:PipedOutputStream,val mPisfromFile:PipedInputStream,
                    val mPisfromCmd:PipedInputStream) :Thread(){
 
 
+
 }
