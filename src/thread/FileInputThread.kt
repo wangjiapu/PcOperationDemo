@@ -14,9 +14,6 @@ import kotlin.collections.ArrayList
 
 class FileInputThread(val pis:PipedInputStream, val pos:PipedOutputStream):Thread(){
     private var FILE_GET=false  //接受文件标志位
-    private var FILE_SEND=false //发送文件标志位
-    private var FILE_NAME=""
-    private var mFileOut :FileOutputStream ?=null
 
     private val mFileQueue: Queue<File> = LinkedList<File>()
 
@@ -45,7 +42,8 @@ class FileInputThread(val pis:PipedInputStream, val pos:PipedOutputStream):Threa
                     val describe = FileDescribe()
                     describe.fileSize = file.length()
                     val name = file.getName().substring(0, file.getName().lastIndexOf("."))
-                    val type = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length)
+                    val type = file.getName().substring(file.getName().lastIndexOf(".") + 1,
+                            file.getName().length)
                     describe.fileName = name
                     describe.fileType = type
                     list.add(describe)
@@ -61,86 +59,8 @@ class FileInputThread(val pis:PipedInputStream, val pos:PipedOutputStream):Threa
                 }
             }
 
-            ProtocolField.fileSend->{
-                val content=read(stream)
-                val command = HandleUtil.gson.fromJson(content, FileCommand::class.java)
-                if (content != null) {
-                    fileOperation(command.describe, content)
-                }
-            }
-            ProtocolField.fileSendOK->{
-
-            }
-           /* ProtocolField.fileHead ->{ //创建文件
-                if (FILE_GET){
-                    val data = read(stream)
-                    val command=HandleUtil.gson.fromJson<FileInfo>(data, FileInfo::class.java)
-                    FILE_NAME=command.name
-                    mFileOut= FileOutputStream( File(FILE_NAME),true )
-
-                }
-                if (FILE_SEND){
-                    //读取文件头内容,并开始发送
-                    val sendData=read(stream)
-
-                }
-
-            }
-            ProtocolField.fileBody ->{
-                //如果是内容就直接接受
-                if (FILE_GET){
-                    getFile(stream)
-                }
-            }
-            ProtocolField.fileSend ->{  //手机端需要接受文件
-                FILE_SEND=true
-                val b= byteArrayOf(ProtocolField.fileSendOK)
-                pos.write(b)
-            }
-            ProtocolField.fileEnd ->{
-                FILE_GET=false
-            }*/
         }
 
-    }
-
-    private fun fileOperation(describes: Array<out FileDescribe>?, content: String) {
-        pos.write(HandleUtil.splicing(ProtocolField.fileSendOK,content))
-        pos.flush()
-       // sendMsg(Parameter.FILE_READY + "_" + jsonSrc + "_" + Parameter.END_FLAG)
-        for (describe in describes!!) {
-            val fileName = describe.getFileName() + "." + describe.getFileType()
-            val fileSize = describe.getFileSize()
-            var count = 0
-            var size: Long = 0
-            val file = File(fileName)
-            var outputStream: FileOutputStream? = null
-            var inputStream: BufferedInputStream? = null
-
-            try {
-                val bytes = ByteArray(4096)
-                outputStream = FileOutputStream(file)
-                inputStream = BufferedInputStream(connSocket.getInputStream())
-                while ((count = inputStream.read(bytes)) != -1) {
-                    println("count is " + count)
-                    outputStream!!.write(bytes, 0, count)
-                    outputStream.flush()
-                    size += count.toLong()
-                    if (size >= fileSize)
-                        break
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } finally {
-                try {
-                    if (outputStream != null)
-                        outputStream.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-
-            }
-        }
     }
 
 
