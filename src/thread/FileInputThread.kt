@@ -2,39 +2,44 @@ package thread
 
 import Utils.HandleUtil
 import Utils.IntConvertUtils
-import beans.FileCommand
 import beans.FileDescribe
+import beans.PackByteArray
 
 import beans.ProtocolField
-import newBeans.FileInfo
-import pcMain.Parameter
 import java.io.*
 import java.util.*
+import java.util.concurrent.LinkedBlockingDeque
 import kotlin.collections.ArrayList
 
-class FileInputThread(val pis:PipedInputStream, val pos:PipedOutputStream):Thread(){
+class FileInputThread:Thread(){
+
     private var FILE_GET=false  //接受文件标志位
 
-    private val mFileQueue: Queue<File> = LinkedList<File>()
+    private val mFileQueue = LinkedList<File>()
+    private val inputQueue = LinkedBlockingDeque<PackByteArray>(1024)
+
+    private val out = OutputThread
 
     override fun run() {
-        while (true) {
-            try {
-                handle(pis)
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
 
+
+        try {
+            while (!Thread.interrupted()){
+                handle()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+
+
     }
 
-    fun handle(stream: InputStream){
-        val size = stream.read(HandleUtil.SINGLEBYTE)
-        println("dispach,singleByte,size:" + size)
-        val type = HandleUtil.SINGLEBYTE[0]
+    private fun handle(){
+        val pba=inputQueue.pop()
+        val type = pba.flag
         when (type) {
             ProtocolField.fileGet -> {
-                val filedescibe=read(stream)
+                val filedescibe=pba.body.toString()
                 val list = ArrayList<FileDescribe>()
                 val fileInfos = HandleUtil.gson.fromJson(filedescibe, Array<beans.FileInfo>::class.java)
                 for (fileInfo in fileInfos) {
@@ -49,14 +54,21 @@ class FileInputThread(val pis:PipedInputStream, val pos:PipedOutputStream):Threa
                     list.add(describe)
                     mFileQueue.add(File(fileInfo.path))
                 }
-                pos.write( HandleUtil.splicing(ProtocolField.fileGetOK,HandleUtil.gson.toJson(list)))
+
+                val bytes=HandleUtil.gson.toJson(list).toByteArray()
+                val len=IntConvertUtils.getShortByByteArray(bytes)
+                val pack=PackByteArray(ProtocolField.fileGetOK, len,bytes)
+                out.addMessage(pack)
                 FILE_GET=true
             }
 
-            ProtocolField.fileHead->{
+            ProtocolField.fileGetHead->{
                 if (FILE_GET){
                    sendFile()
                 }
+            }
+            ProtocolField.fileGetEnd ->{
+                FILE_GET=false
             }
 
         }
@@ -65,6 +77,7 @@ class FileInputThread(val pis:PipedInputStream, val pos:PipedOutputStream):Threa
 
 
     private fun sendFile() {
+
         while (mFileQueue.isEmpty()) {
             var count = 0
             val inputStream = FileInputStream(mFileQueue.poll())
@@ -74,8 +87,9 @@ class FileInputThread(val pis:PipedInputStream, val pos:PipedOutputStream):Threa
                 if (count == -1)
                     break
                 if (count == 1020){
-                    pos.write(HandleUtil.splicing(ProtocolField.fileBody,bytes))
-                    pos.flush()
+                    val pack=PackByteArray(ProtocolField.fileGetBody,
+                            IntConvertUtils.getShortByByteArray(bytes), bytes)
+                    out.addMessage(pack)
                 }
                 else {
                     val newBytes = ByteArray(count)
@@ -85,29 +99,20 @@ class FileInputThread(val pis:PipedInputStream, val pos:PipedOutputStream):Threa
                         newBytes[i] = bytes[i]
                         i++
                     }
-                    pos.write(HandleUtil.splicing(ProtocolField.fileBody,newBytes))
-                    pos.flush()
+                    val pack=PackByteArray(ProtocolField.fileGetBody,
+                            IntConvertUtils.getShortByByteArray(newBytes), newBytes)
+                    out.addMessage(pack)
                 }
             }
             inputStream.close()
         }
+        val pack=PackByteArray(ProtocolField.fileGetEnd,0,null)
+        out.addMessage(pack)
     }
 
-    private fun read(input:InputStream):String ? {
-        //接收文件
-        var fileSize = 0
-        var result=""
-        try {
-            fileSize = input.read(HandleUtil.DOUBLEBYTE)
-            val dataSize = IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE)
-            if (dataSize <= 0) {
-                return null
-            }
-            result = HandleUtil.read(input , dataSize)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        return result
+
+    public fun addMessage(byteArray: PackByteArray) {
+        inputQueue.putLast(byteArray)
     }
 
 }

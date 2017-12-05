@@ -15,6 +15,7 @@ object  DataUtil {
             when(b){
                 0x10.toByte() -> return 1
                 0X20.toByte() -> return 2
+                0x30.toByte() -> return 3
             }
             return -1
         }

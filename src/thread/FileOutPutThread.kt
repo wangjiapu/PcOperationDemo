@@ -1,75 +1,73 @@
 package thread
 
 import Utils.HandleUtil
-import Utils.IntConvertUtils
 import beans.FileCommand
 import beans.FileDescribe
+import beans.PackByteArray
 import beans.ProtocolField
-import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.LinkedBlockingDeque
 
+
+
 class FileOutPutThread:Thread() {
 
-    private val fileoutQueue=LinkedBlockingDeque<ByteArray>(1024)
+    private val fileoutQueue=LinkedBlockingDeque<PackByteArray>(1024)
 
+    private val outthread=OutputThread
+
+    private var FILE_SEND=false
+
+    private var describes: Array<out FileDescribe> ?=null
     override fun run() {
         try {
             while (!Thread.interrupted()){
                 handle()
             }
         }catch (e:InterruptedException){
-            println("FileOutputThread is dead!!!1")
+            println("FileOutputThread is dead!!!")
         }
-
 
     }
 
 
     private fun handle() {
         val data=fileoutQueue.pop()
-        val bytesize= byteArrayOf(data[1],data[2])
-        when(data[0]){
+        when(data.flag){
             ProtocolField.fileSend->{
-                val content=String(data,2,IntConvertUtils.getShortByByteArray(bytesize).toInt())
+                val content=data.body.toString()
                 val command = HandleUtil.gson.fromJson(content, FileCommand::class.java)
+                 describes = command.describe
+                val pack=PackByteArray(ProtocolField.fileSendOK,data.len,data.body)
 
-                fileOperation(command.describe, content)
-
+                outthread.addMessage(pack)
+                FILE_SEND =true
             }
             ProtocolField.fileSendOK-> {
-
+                if (FILE_SEND){
+                    fileOperation(data)
+                }
+            }
+            ProtocolField.fileSendEnd->{
+                val pack=PackByteArray(ProtocolField.fileSendEnd,0,null)
+                outthread.addMessage(pack)
+                FILE_SEND=false
             }
         }
     }
 
-    private fun fileOperation(describes: Array<out FileDescribe>?, content: String) {
-        pos.write(HandleUtil.splicing(ProtocolField.fileSendOK,content))
-        pos.flush()
-        // sendMsg(Parameter.FILE_READY + "_" + jsonSrc + "_" + Parameter.END_FLAG)
+    private fun fileOperation(data:PackByteArray) {
         for (describe in describes!!) {
             val fileName = describe.getFileName() + "." + describe.getFileType()
-            val fileSize = describe.getFileSize()
-            var count = 0
-            var size: Long = 0
             val file = File(fileName)
             var outputStream: FileOutputStream? = null
-            var inputStream: BufferedInputStream? = null
 
             try {
-                val bytes = ByteArray(4096)
                 outputStream = FileOutputStream(file)
-                inputStream = BufferedInputStream(connSocket.getInputStream())
-                while ((count = inputStream.read(bytes)) != -1) {
-                    println("count is " + count)
-                    outputStream!!.write(bytes, 0, count)
-                    outputStream.flush()
-                    size += count.toLong()
-                    if (size >= fileSize)
-                        break
-                }
+                outputStream.write(data.body)
+
             } catch (e: IOException) {
                 e.printStackTrace()
             } finally {
@@ -84,7 +82,7 @@ class FileOutPutThread:Thread() {
         }
     }
 
-    public fun addMessage(b:ByteArray){
+     fun addMessage(b:PackByteArray){
         fileoutQueue.putLast(b)
     }
 

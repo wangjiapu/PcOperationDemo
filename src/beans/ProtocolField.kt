@@ -15,19 +15,25 @@ object ProtocolField {
     /**
      *  File operation Fields
      * */
-    const val fileSend =    0x10.toByte()
-    const val fileSendBig = 0x11.toByte()
-    const val fileSendOK =  0x12.toByte()
-    const val fileGet =     0x13.toByte()
-    const val fileGetBig =  0x14.toByte()
-    const val fileGetOK =   0x15.toByte()
-    const val fileHead =    0x16.toByte()
-    const val fileBody =    0x17.toByte()
-    const val fileEnd =     0x18.toByte()
-    const val fileStop =    0x19.toByte()
-    const val fileContinue =0x1a.toByte()
+
+    const val fileGet =        0x10.toByte()
+    const val fileGetBig =     0x11.toByte()
+    const val fileGetOK =      0x12.toByte()
+    const val fileGetHead =    0x13.toByte()
+    const val fileGetBody =    0x14.toByte()
+    const val fileGetEnd =     0x15.toByte()
+    const val fileGetStop =    0x16.toByte()
+    const val fileGetContinue =0x17.toByte()
 
 
+    const val fileSend =        0x30.toByte()
+    const val fileSendBig =     0x31.toByte()
+    const val fileSendOK =      0x32.toByte()
+    const val fileSendHead =    0x33.toByte()
+    const val fileSendBody =    0x34.toByte()
+    const val fileSendEnd =     0x35.toByte()
+    const val fileSendStop =    0x36.toByte()
+    const val fileSendContinue =0x37.toByte()
     /**
      *  Command operation Fields
      * */

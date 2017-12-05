@@ -2,65 +2,55 @@ package thread;
 
 import Utils.HandleUtil;
 import Utils.IntConvertUtils;
-import beans.Command;
-import beans.FileCommand;
-import beans.FileDescribe;
-import beans.ProtocolField;
+import beans.*;
 import com.google.gson.Gson;
+import org.jetbrains.annotations.NotNull;
 import pcOp.PcDisk;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Handles commands that need to be returned
  */
-public class CommandThread extends Thread {
+public class CommandThread extends Thread{
 
+    private static final String TAG="CommandThread";
     private String filename;
     private static boolean flag=false;
-    private  PipedOutputStream mPos;
-    private  PipedInputStream mPis;
 
+    private  static Queue<PackByteArray> cmdQueue=new LinkedBlockingDeque<>(1024);
 
-    public CommandThread(PipedInputStream pis, PipedOutputStream pos){
-        this.mPis=pis;
-        this.mPos=pos;
-    }
+    private  OutputThread out=OutputThread.INSTANCE;
+    public CommandThread(){ }
 
     @Override
     public void run() {
-        while (true){
-            try {
-                handle(mPis);
-            } catch (IOException e) {
-                e.printStackTrace();
+        try{
+            while (!Thread.interrupted()){
+                handle();
             }
+        }catch (Exception e){
+            System.out.println(TAG+e.getMessage());
         }
-
     }
 
-    private void handle(InputStream stream) throws IOException {
+    private void handle() throws IOException {
 
-        int size=stream.read(HandleUtil.SINGLEBYTE);
-        System.out.println("dispach,singleByte,size:"+size);
-        byte type=HandleUtil.SINGLEBYTE[0];
+       PackByteArray pba=cmdQueue.peek();
+        byte type=pba.getFlag();
         switch (type){
             case 0x21:
-                int cmdSize = 0;
-                try {
-                    cmdSize = stream.read(HandleUtil.DOUBLEBYTE);
-                    System.out.println("need return command size:"+cmdSize);
-                    short  dataSize= IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
-                    if (dataSize<=0){
-                        return;
-                    }
-                    String data= HandleUtil.read(stream,dataSize);
+
+                short  dataSize= pba.getLen();
+                if (dataSize>0 && pba.getBody()!=null){
+                    String data= new String(pba.getBody());
                     Command command=HandleUtil.gson.fromJson(data,Command.class);
                     commandSwitch(command);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    return;
                 }
                 break;
             case 0x22:
@@ -80,15 +70,18 @@ public class CommandThread extends Thread {
                 PcDisk pcDisk = new PcDisk();
                 if (command.getDescribe().isEmpty()) {
                     String diskinfo=HandleUtil.gson.toJson(pcDisk.getDisk());
-
-                    mPos.write(HandleUtil.splicing(ProtocolField.command,diskinfo));
-                    mPos.flush();
+                    byte[] bytes=diskinfo.getBytes();
+                    PackByteArray pack=new PackByteArray(ProtocolField.command,
+                            IntConvertUtils.getShortByByteArray(bytes),bytes);
+                    out.addMessageHighLevel(pack);
                 } else {
 
                     String dir = HandleUtil.gson.toJson(pcDisk
                             .getFileDirectory(command.getDescribe()));
-                    mPos.write(HandleUtil.splicing(ProtocolField.command,dir));
-                    mPos.flush();
+                    byte[] bytes=dir.getBytes();
+                    PackByteArray pack=new PackByteArray(ProtocolField.command,
+                            IntConvertUtils.getShortByByteArray(bytes),bytes);
+                    out.addMessageHighLevel(pack);
                 }
                 break;
             default:
@@ -108,14 +101,19 @@ public class CommandThread extends Thread {
                 count=fileInputStream.read(bytes);
                 if (count==-1)
                     break;
-                if (count==1020)
-                    mPos.write(HandleUtil.splicing(ProtocolField.cmdScreenBody,bytes));
+                if (count==1020){
+                    PackByteArray pack=new PackByteArray(ProtocolField.cmdScreenBody,
+                            IntConvertUtils.getShortByByteArray(bytes),bytes);
+                    out.addMessageHighLevel(pack);
+                }
                 else{
                     byte[] newbytes=new byte[count];
                     for(int i=0;i<count;i++){
                         newbytes[i]=bytes[i];
                     }
-                    mPos.write(HandleUtil.splicing(ProtocolField.cmdScreenBody,newbytes));
+                    PackByteArray pack=new PackByteArray(ProtocolField.cmdScreenBody,
+                            IntConvertUtils.getShortByByteArray(newbytes),newbytes);
+                    out.addMessageHighLevel(pack);
                     flag=false;
                     filename=null;
                 }
@@ -133,9 +131,10 @@ public class CommandThread extends Thread {
         File file=new File(fName);
         if (file.exists()){
             String screeninfo=getScreeninfo(file);
-            byte[] data=HandleUtil.splicing(ProtocolField.commandreturn,screeninfo);
-            mPos.write(data);
-            mPos.flush();
+            byte[] data=screeninfo.getBytes();
+            PackByteArray pack=new PackByteArray(ProtocolField.commandreturn,
+                    IntConvertUtils.getShortByByteArray(data),data);
+            out.addMessageHighLevel(pack);
             flag=true;
         }
     }
@@ -151,6 +150,12 @@ public class CommandThread extends Thread {
         command.setType("21");
         String s=new Gson().toJson(command);
         return s;
+    }
+
+
+
+    public void addMessage(@NotNull PackByteArray byteArray) {
+        cmdQueue.add(byteArray);
     }
 
 }

@@ -21,19 +21,6 @@ import java.util.TimerTask;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 class GUI {
-
-    private static  PipedInputStream[] pises;
-    private static PipedOutputStream[] poses;
-
-    static {
-        pises=new PipedInputStream[6];
-        poses=new PipedOutputStream[6];
-        for (int i=0;i<pises.length;i++){
-            pises[i]=new PipedInputStream();
-            poses[i]=new PipedOutputStream();
-        }
-    }
-
     private JFrame frame;
     private JTextField username;
     private JPasswordField pwd;
@@ -166,9 +153,6 @@ class GUI {
     }
 
     private void initClick() {
-
-        buildPipe();
-
         dialogClick(dialog);
         dialogClick(signinDialog);
         dialogClick(noSigninDialog);
@@ -232,6 +216,7 @@ class GUI {
      */
     private void StartThreadTree() {
 
+/*
 
         SocketMeager socketMeager=new SocketMeager(poses[0],pises[1]);
 
@@ -239,7 +224,14 @@ class GUI {
         OutputThread outputThread=new OutputThread(poses[1],pises[4],pises[5]);
         CommandThread commandThread=new CommandThread(pises[2],poses[5]);
         FileInputThread fileInputThread =new FileInputThread(pises[3],poses[4]);
+*/
 
+        SocketMeager socketMeager=new SocketMeager();
+
+        InputThread inputThread=new InputThread();
+        OutputThread outputThread=new OutputThread();
+        CommandThread commandThread=new CommandThread();
+        FileInputThread fileInputThread =new FileInputThread();
 
         socketMeager.start();
         inputThread.start();
@@ -248,17 +240,6 @@ class GUI {
         fileInputThread.start();
     }
 
-
-    private void buildPipe(){
-
-        for (int i=0;i<pises.length;i++){
-            try {
-                pises[i].connect(poses[i]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private void dialogClick(Dialog dialog) {
         dialog.addWindowListener(new WindowAdapter() {

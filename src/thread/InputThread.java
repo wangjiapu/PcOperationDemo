@@ -1,14 +1,15 @@
 package thread;
 
+import Utils.DataUtil;
 import Utils.HandleUtil;
-import Utils.IntConvertUtils;
 import beans.Command;
+import beans.PackByteArray;
+import org.jetbrains.annotations.NotNull;
 import pcOp.*;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 
 /**
@@ -16,15 +17,16 @@ import java.io.PipedOutputStream;
  * Implementation of different command event handling
  */
 public class InputThread extends Thread{
-    private PipedInputStream pis;
-    private PipedOutputStream mPos2cmd;
-    private PipedOutputStream mPos3file;
 
-    public InputThread(PipedInputStream p,PipedOutputStream p2,PipedOutputStream p3){
-        this.pis=p;
-        this.mPos2cmd=p2;
-        this.mPos3file=p3;
-    }
+    private static final String TAG="InputThread";
+
+    private static Queue<PackByteArray> mQueue=new LinkedBlockingDeque<>(1024);
+
+    private static FileInputThread fileInputThread=new FileInputThread();
+    private static FileOutPutThread fileOutPutThread=new FileOutPutThread();
+    private static CommandThread commandThread=new CommandThread();
+
+    public InputThread(){ }
 
     @Override
     public void run() {
@@ -32,76 +34,43 @@ public class InputThread extends Thread{
     }
 
     private void inputLoop() {
-        while (true){
-            try {
-                dispach(pis);
-            } catch (IOException e) {
-                e.printStackTrace();
+        try{
+            while (!Thread.interrupted()){
+                dispach();
             }
+        }catch (Exception e){
+            System.out.println(TAG+e.getMessage());
         }
+
     }
 
     /**
      * Shunt files and commands into different threads
      */
-    private void dispach(InputStream stream) throws IOException {
-        int size=stream.read(HandleUtil.SINGLEBYTE);
-        System.out.println("dispach,singleByte,size:"+size);
-        byte type=HandleUtil.SINGLEBYTE[0];
+    private void dispach() throws IOException {
+        PackByteArray pba=mQueue.peek();
+        byte type=pba.getFlag();
         switch (type){
-            case 0x10:
-            case 0x12:
-
-            case 0x13:
-            case 0x15:
-
-            case 0x18:
-            case 0x19:
-            case 0x1a:
-                mPos3file.write(type);
-                mPos3file.flush();
-                break;
             case 0x20://this command no return
-                int size_1 = stream.read(HandleUtil.DOUBLEBYTE);
-                System.out.println("no dispach size:"+size_1);
-                short  dataSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
-                if (dataSize<=0){
-                    return;
-                }
-                String data=HandleUtil.read(stream,dataSize);
 
-                Command command = HandleUtil.gson.fromJson(data, Command.class);
-                operation(command);
-                break;
-            case 0x21://need return
-            case 0x22:
-                int size2=stream.read(HandleUtil.DOUBLEBYTE);
-                System.out.println("need return cmd size2:"+size2);
-                short cmdSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
-                if (cmdSize<=0){
-                    return;
+                short  dataSize=pba.getLen();
+                if (dataSize>0 && pba.getBody()!=null){
+                    Command command = HandleUtil.gson.fromJson(new String(pba.getBody()), Command.class);
+                    operation(command);
                 }
-                byte[] cmd=new byte[cmdSize];
-                int send2nextSize=stream.read(cmd);
-                System.out.println("send to commandThread size:"+send2nextSize);
-                mPos2cmd.write(type);
-                mPos2cmd.write(cmd);
-                mPos2cmd.flush();
                 break;
-           default:
-               int size3=stream.read(HandleUtil.DOUBLEBYTE);
-               System.out.println("file size:"+size3);
-               short fileSize=IntConvertUtils.getShortByByteArray(HandleUtil.DOUBLEBYTE);
-               if (fileSize<=0){
-                   return;
-               }
-               byte[] file=new byte[fileSize];
-               int ss=stream.read(file);
-               System.out.println("file size:"+ss);
-               mPos3file.write(type);
-               mPos3file.write(file);
-               mPos3file.flush();
+            default:
+                   switch (DataUtil.getType(type)){
+                       case 1:
+                           fileInputThread.addMessage(pba);
+                           break;
+                       case 2://need return
+                           commandThread.addMessage(pba);
+                           break;
+                       default:
+                           fileOutPutThread.addMessage(pba);
 
+                   }
         }
 
     }
@@ -161,4 +130,7 @@ public class InputThread extends Thread{
     }
 
 
+    public void addMessage(@NotNull PackByteArray byteArray) {
+        mQueue.add(byteArray);
+    }
 }

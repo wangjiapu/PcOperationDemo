@@ -1,15 +1,15 @@
 package pcMain;
 
 import Utils.DataUtil;
-import beans.Command;
-import beans.Content;
-import beans.FileCommand;
-import beans.ProtocolField;
+import Utils.IntConvertUtils;
+import beans.*;
 import thread.InputThread;
 
 import javax.xml.crypto.Data;
 import java.io.*;
 import java.net.Socket;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * 连接服务端socket,
@@ -17,18 +17,15 @@ import java.net.Socket;
  */
 public  class SocketMeager extends Thread {
     private static boolean loopFlag = true;
-    private PipedOutputStream out;//做生产者时
-    private PipedInputStream pis;//做消费者
 
     private InputStream is;
     private OutputStream os;
 
+    private static InputThread out=new InputThread();
   //  private static Socket mSocket;
+    private static Queue<PackByteArray> socketQueue=new LinkedBlockingDeque<>(1024);
 
-    SocketMeager(PipedOutputStream pout,PipedInputStream is){
-        this.pis=is;
-        this.out=pout;
-    }
+    public SocketMeager(){ }
 
     @Override
     public void run() {
@@ -86,20 +83,39 @@ public  class SocketMeager extends Thread {
     private   void loop() {
         while (loopFlag){
             try {
-                byte[] bytes=new byte[1024];
-                int size=is.read(bytes);
-                System.out.println("pipe1,size:"+size);
-                out.write(bytes);
-                out.flush();
 
-                byte[] outbyte=new byte[1024];
-                int size2=pis.read(outbyte);
-                System.out.println("pipe2,size:"+size2);
-                os.write(outbyte);
-                os.flush();
+                byte[] bytes=new byte[3];
+                int size=is.read(bytes);
+               // System.out.println("pipe1,size:"+size);
+                byte[] sb={bytes[1],bytes[2]};
+                short datasize= IntConvertUtils.getShortByByteArray(sb);
+                if (datasize>0){
+                    byte[] data=new byte[datasize];
+                    int realsize=is.read(data);
+                   // System.out.println("realSize,"+realsize);
+                    PackByteArray pack=new PackByteArray(bytes[0],datasize,data);
+                    out.addMessage(pack);
+                }else{
+                    PackByteArray pack=new PackByteArray(bytes[0],datasize,null);
+                    out.addMessage(pack);
+                }
+                if (!socketQueue.isEmpty()){
+                    PackByteArray pba=socketQueue.peek();
+                    os.write(pba.getFlag());
+                    os.write(pba.getLen());
+                    if (pba.getBody()!=null){
+                        os.write(pba.getBody());
+                    }
+                    os.flush();
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void addMessage(PackByteArray packByteArray){
+            socketQueue.add(packByteArray);
     }
 }

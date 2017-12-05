@@ -2,7 +2,7 @@ package beans
 
 import java.util.*
 
-data class PackByteArray (public val flag : Byte , public val body:ByteArray?){
+data class PackByteArray (public val flag : Byte ,val len : Short, public val body:ByteArray?){
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
