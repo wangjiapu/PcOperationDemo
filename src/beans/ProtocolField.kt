@@ -34,6 +34,8 @@ object ProtocolField {
     const val fileSendEnd =     0x35.toByte()
     const val fileSendStop =    0x36.toByte()
     const val fileSendContinue =0x37.toByte()
+
+
     /**
      *  Command operation Fields
      * */

@@ -45,10 +45,13 @@ class FileOutPutThread:Thread() {
                 outthread.addMessage(pack)
                 FILE_SEND =true
             }
-            ProtocolField.fileSendOK-> {
+            ProtocolField.fileSendHead -> {
                 if (FILE_SEND){
                     fileOperation(data)
                 }
+            }
+            ProtocolField.cmdScreenBody->{
+
             }
             ProtocolField.fileSendEnd->{
                 val pack=PackByteArray(ProtocolField.fileSendEnd,0,null)
