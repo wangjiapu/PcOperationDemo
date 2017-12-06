@@ -25,6 +25,8 @@ public class CommandThread extends Thread{
     private  static Queue<PackByteArray> cmdQueue=new LinkedBlockingDeque<>(1024);
 
     private  OutputThread out=OutputThread.INSTANCE;
+
+
     public CommandThread(){ }
 
     @Override

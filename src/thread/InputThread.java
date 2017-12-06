@@ -52,7 +52,6 @@ public class InputThread extends Thread{
         byte type=pba.getFlag();
         switch (type){
             case 0x20://this command no return
-
                 short  dataSize=pba.getLen();
                 if (dataSize>0 && pba.getBody()!=null){
                     Command command = HandleUtil.gson.fromJson(new String(pba.getBody()), Command.class);

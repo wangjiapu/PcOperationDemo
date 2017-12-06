@@ -1,9 +1,9 @@
 package beans;
 
 public class FileDescribe {
-    String fileName;
-    String fileType;
-    Long fileSize;
+    private String fileName;
+    private String fileType;
+    private Long fileSize;
 
     public FileDescribe(){}
 
