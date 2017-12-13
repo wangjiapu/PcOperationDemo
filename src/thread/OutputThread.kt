@@ -17,19 +17,6 @@ object OutputThread :Thread(){
 
     private val out = SocketMeager()
 
-   //  private constructor()
-
-
-
-    /*fun getInstance(){
-        return NewClass.instance
-    }
-
-    private object NewClass{
-        val instance=OutputThread()
-    }
-
-    private operator fun invoke() {}*/
 
     override fun run() {
         try {

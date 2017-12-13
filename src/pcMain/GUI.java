@@ -216,16 +216,6 @@ class GUI {
      */
     private void StartThreadTree() {
 
-/*
-
-        SocketMeager socketMeager=new SocketMeager(poses[0],pises[1]);
-
-        InputThread inputThread=new InputThread(pises[0],poses[2],poses[3]);
-        OutputThread outputThread=new OutputThread(poses[1],pises[4],pises[5]);
-        CommandThread commandThread=new CommandThread(pises[2],poses[5]);
-        FileInputThread fileInputThread =new FileInputThread(pises[3],poses[4]);
-*/
-
         SocketMeager socketMeager=new SocketMeager();
 
         InputThread inputThread=new InputThread();

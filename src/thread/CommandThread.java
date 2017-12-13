@@ -25,6 +25,8 @@ public class CommandThread extends Thread{
     private  static Queue<PackByteArray> cmdQueue=new LinkedBlockingDeque<>(1024);
 
     private  OutputThread out=OutputThread.INSTANCE;
+
+
     public CommandThread(){ }
 
     @Override
@@ -70,7 +72,7 @@ public class CommandThread extends Thread{
                 PcDisk pcDisk = new PcDisk();
                 if (command.getDescribe().isEmpty()) {
                     String diskinfo=HandleUtil.gson.toJson(pcDisk.getDisk());
-                    byte[] bytes=diskinfo.getBytes();
+                    byte[] bytes=diskinfo.getBytes("UTF-8");
                     PackByteArray pack=new PackByteArray(ProtocolField.command,
                             IntConvertUtils.getShortByByteArray(bytes),bytes);
                     out.addMessageHighLevel(pack);
@@ -94,14 +96,14 @@ public class CommandThread extends Thread{
         if (flag && name.equals(filename)){
             System.out.println("开始发送");
             //开始发
-            byte[] bytes=new byte[1020];
+            byte[] bytes=new byte[4096];
             FileInputStream fileInputStream=new FileInputStream(filename+".jpg");
             int count=0;
             while (true){
                 count=fileInputStream.read(bytes);
                 if (count==-1)
                     break;
-                if (count==1020){
+                if (count==4096){
                     PackByteArray pack=new PackByteArray(ProtocolField.cmdScreenBody,
                             IntConvertUtils.getShortByByteArray(bytes),bytes);
                     out.addMessageHighLevel(pack);
