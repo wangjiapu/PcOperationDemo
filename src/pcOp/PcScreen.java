@@ -111,7 +111,6 @@ public class PcScreen{
         }
         int size=data.size();
         command.setDescribe((data.toArray(new FileDescribe[size])));
-        command.setBack(false);
         command.setType("21");
         String s=new Gson().toJson(command);
         return s;

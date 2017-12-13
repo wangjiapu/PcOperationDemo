@@ -151,7 +151,7 @@ public class OpenService {
     public static void sendMsg(@NotNull String s) {
         try {
             byte[] bytes = s.getBytes("UTF-8");
-            os.write(IntConvertUtils.getIntegerBytes(bytes.length));
+            os.write(IntConvertUtils.getShortBytes((short) bytes.length));
             os.write(bytes);
         } catch (IOException e) {
             e.printStackTrace();
@@ -173,7 +173,7 @@ public class OpenService {
             byte[] msgSizeBytes = new byte[4];
             int readSize = is.read(msgSizeBytes);
             System.out.println("readSIze is " + readSize);
-            msgSize = IntConvertUtils.getIntegerByByteArray(msgSizeBytes);
+            msgSize = IntConvertUtils.getShortByByteArray(msgSizeBytes);
             if (msgSize <= 0) {
                 loopFlag = false;
                 return "";
