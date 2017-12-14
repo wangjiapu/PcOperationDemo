@@ -165,7 +165,7 @@ class GUI {
                 noSigninDialog.setVisible(true);
             }else{
                 if (u.equals(info[0]) & p.equals(info[1])){
-                    if (OpenService.startSocket(u,p)){
+                    if (true){
 
                         dialog.setVisible(true);
                         StartThreadTree();

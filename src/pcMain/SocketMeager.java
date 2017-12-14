@@ -30,7 +30,7 @@ public  class SocketMeager extends Thread {
     @Override
     public void run() {
         while (true){
-            startSocket("ppp","1111");
+            startSocket("pjw","1111");
             try {
                 loopFlag=true;
                 Thread.sleep(2000);
