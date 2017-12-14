@@ -15,7 +15,7 @@ object OutputThread :Thread(){
 
     private val outQueue=LinkedBlockingDeque<PackByteArray>(1024)
 
-    private val out = SocketMeager()
+    private val out = SocketMeager.getInstance()
 
 
     override fun run() {

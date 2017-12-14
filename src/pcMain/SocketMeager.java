@@ -21,11 +21,19 @@ public  class SocketMeager extends Thread {
     private InputStream is;
     private OutputStream os;
 
-    private static InputThread out=new InputThread();
+    private static InputThread out=InputThread.getInstance();
   //  private static Socket mSocket;
     private static Queue<PackByteArray> socketQueue=new LinkedBlockingDeque<>(1024);
 
-    public SocketMeager(){ }
+    private SocketMeager(){ }
+
+    public static SocketMeager getInstance(){
+        return ClassSocket.INSTANCE;
+    }
+    private static class ClassSocket{
+        private static SocketMeager INSTANCE=new SocketMeager();
+    }
+
 
     @Override
     public void run() {

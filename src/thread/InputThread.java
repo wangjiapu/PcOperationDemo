@@ -23,13 +23,21 @@ public class InputThread extends Thread{
 
     private static Queue<PackByteArray> mQueue=new LinkedBlockingDeque<>(1024);
 
-    private static FileInputThread fileInputThread=new FileInputThread();
-    private static FileOutPutThread fileOutPutThread=new FileOutPutThread();
-    private static CommandThread commandThread=new CommandThread();
+    private static FileInputThread fileInputThread=FileInputThread.INSTANCE;
+    private static FileOutPutThread fileOutPutThread=FileOutPutThread.INSTANCE;
+    private static CommandThread commandThread=CommandThread.getInstance();
 
     private static OutputThread out=OutputThread.INSTANCE;
 
-    public InputThread(){ }
+    private InputThread(){ }
+
+    public static InputThread getInstance(){
+        return ClassInput.INSTANCE;
+    }
+    private static class ClassInput{
+        private static InputThread INSTANCE=new InputThread();
+    }
+
 
     @Override
     public void run() {

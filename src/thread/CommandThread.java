@@ -27,7 +27,15 @@ public class CommandThread extends Thread{
     private  OutputThread out=OutputThread.INSTANCE;
 
 
-    public CommandThread(){ }
+    private CommandThread(){ }
+
+    public static CommandThread getInstance(){
+        return ClassCommand.INSTANCE;
+    }
+    private static class ClassCommand{
+        private static CommandThread INSTANCE=new CommandThread();
+    }
+
 
     @Override
     public void run() {

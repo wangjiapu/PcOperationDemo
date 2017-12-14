@@ -14,7 +14,7 @@ import java.util.concurrent.LinkedBlockingDeque
 
 
 
-class FileOutPutThread:Thread() {
+object FileOutPutThread:Thread() {
 
     private val fileOutQueue=LinkedBlockingDeque<PackByteArray>(1024)
 

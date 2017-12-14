@@ -14,7 +14,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingDeque
 
 
-class FileInputThread:Thread(){
+object FileInputThread:Thread(){
 
     private var key:Short=0
     private val Perparedfiles=HashMap<Short,File>()
