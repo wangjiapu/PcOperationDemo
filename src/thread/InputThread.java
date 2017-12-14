@@ -4,6 +4,7 @@ import Utils.DataUtil;
 import Utils.HandleUtil;
 import beans.Command;
 import beans.PackByteArray;
+import beans.ProtocolField;
 import org.jetbrains.annotations.NotNull;
 import pcOp.*;
 
@@ -25,6 +26,8 @@ public class InputThread extends Thread{
     private static FileInputThread fileInputThread=new FileInputThread();
     private static FileOutPutThread fileOutPutThread=new FileOutPutThread();
     private static CommandThread commandThread=new CommandThread();
+
+    private static OutputThread out=OutputThread.INSTANCE;
 
     public InputThread(){ }
 
@@ -51,6 +54,10 @@ public class InputThread extends Thread{
         PackByteArray pba=mQueue.peek();
         byte type=pba.getFlag();
         switch (type){
+            case ProtocolField.isConn:
+                PackByteArray pack=new PackByteArray(ProtocolField.isConn,(short) 0,null);
+                out.addMessageHighLevel(pack);
+                break;
             case 0x20://this command no return
                 short  dataSize=pba.getLen();
                 if (dataSize>0 && pba.getBody()!=null){

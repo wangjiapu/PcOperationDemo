@@ -47,8 +47,7 @@ object ProtocolField {
 
 
 
-    /**
-     *
-     */
-    const val realtimescreen= 0xff.toByte()
+    const val isConn : Byte = 0xff.toByte()
+
+
 }
