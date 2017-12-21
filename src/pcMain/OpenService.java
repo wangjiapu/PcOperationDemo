@@ -19,7 +19,7 @@ public class OpenService {
     private static InputStream is;
     private static BufferedReader reader;
     private static Gson gson = new Gson();
-    private static boolean loopFlag = true;
+    public static boolean loopFlag = true;
 
 
 
